@@ -1,0 +1,529 @@
+<!-- Audit Log Page -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Audit Log - NanoTrace Admin</title>
+  <style>
+    :root{
+      --bg:#0b1220; --panel:#111a2e; --muted:#8892a6; --text:#e6eef9;
+      --brand:#39c27f; --brand-2:#4ca3ff; --warn:#ffb020; --danger:#ff5d5d;
+      --ok:#2ec27e; --card:#0f1629; --border:rgba(255,255,255,0.08);
+      --shadow: 0 6px 24px rgba(0,0,0,0.35); --radius:20px;
+    }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(1200px 800px at 10% -10%, rgba(76,163,255,0.12), transparent 60%),
+                  radial-gradient(1200px 800px at 110% 10%, rgba(57,194,127,0.10), transparent 60%), var(--bg); color:var(--text);}
+    a{color:inherit;text-decoration:none} .wrap{display:grid;grid-template-columns: 260px 1fr; min-height:100%}
+    .side{background:linear-gradient(180deg, #0d1730, #0a1122); border-right:1px solid var(--border); padding:24px 18px;}
+    .brand{display:flex; align-items:center; gap:12px; margin-bottom:28px;}
+    .brand .logo{width:40px; height:40px; border-radius:12px; background: conic-gradient(from 30deg, var(--brand-2), var(--brand)); box-shadow: inset 0 0 20px rgba(255,255,255,0.25);}
+    .brand h1{font-size:18px; letter-spacing:.4px; margin:0} .nav{display:flex; flex-direction:column; gap:8px}
+    .nav a{padding:10px 12px; border-radius:12px; color:var(--muted); display:flex; align-items:center; gap:10px; cursor:pointer;}
+    .nav a.active, .nav a:hover{background:rgba(76,163,255,0.12); color:#d9e6ff}
+    .tag{font-size:10px; padding:2px 8px; border-radius:999px; background:rgba(57,194,127,.15); color:#b8ffd9; margin-left:auto}
+    .sep{height:1px; background:var(--border); margin:14px 0} .main{display:grid; grid-template-rows: auto 1fr;}
+    .top{display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:1px solid var(--border);}
+    .content{padding:24px;} .page-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;}
+    .page-title{font-size:24px; font-weight:600; margin:0} .filters{display:flex; gap:12px; align-items:center;}
+    .btn{background:linear-gradient(180deg, #1b2b4d, #15223f); border:1px solid var(--border); color:#e6eef9; padding:10px 14px; border-radius:12px; cursor:pointer;}
+    .btn.brand{background:linear-gradient(180deg, #1c3b2d, #12261f); border-color:rgba(57,194,127,.3)} .btn:hover{filter:brightness(1.05)}
+    .card{background:linear-gradient(180deg, #0f182d, #0b1220); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); margin-bottom:18px;}
+    .table{width:100%; border-collapse: collapse;}
+    .table th, .table td{padding:12px 10px; border-bottom:1px solid var(--border); color:#cdd6ea; font-size:14px; text-align:left}
+    .table th{background:#0a1122; font-weight:600; color:#a4afc6}
+    .badge{padding:4px 12px; border-radius:999px; font-size:12px; font-weight:500}
+    .b-create{background:rgba(57,194,127,.12); color:#b8ffd9; border:1px solid rgba(57,194,127,.3)}
+    .b-update{background:rgba(76,163,255,.12); color:#cce7ff; border:1px solid rgba(76,163,255,.3)}
+    .b-delete{background:rgba(255,93,93,.12); color:#ffc3c3; border:1px solid rgba(255,93,93,.3)}
+    .b-login{background:rgba(255,176,32,.12); color:#ffd28a; border:1px solid rgba(255,176,32,.3)}
+    .audit-timestamp{color:var(--muted); font-size:13px; font-family:monospace}
+    .audit-user{color:var(--brand-2); font-weight:500}
+    .audit-details{color:var(--muted); font-size:13px; max-width:300px; overflow:hidden; text-overflow:ellipsis}
+    .ip-address{font-family:monospace; font-size:12px; color:var(--muted)}
+    .search-bar{display:flex; gap:12px; margin-bottom:18px}
+    .search-input{background:var(--card); border:1px solid var(--border); padding:10px 14px; border-radius:12px; color:var(--text); flex:1}
+    .search-input::placeholder{color:var(--muted)}
+    .export-btn{background:var(--brand); color:white; border:none; padding:10px 16px; border-radius:12px; cursor:pointer}
+    .filter-tabs{display:flex; gap:8px; margin-bottom:18px}
+    .filter-tab{padding:8px 16px; border:1px solid var(--border); border-radius:12px; background:transparent; color:var(--muted); cursor:pointer}
+    .filter-tab.active{background:var(--brand-2); color:white; border-color:var(--brand-2)}
+    .stats-row{display:grid; grid-template-columns: repeat(4, 1fr); gap:18px; margin-bottom:24px;}
+    .stat-card{padding:20px; text-align:center;} .stat-number{font-size:2em; font-weight:bold; color:var(--brand-2); margin-bottom:8px}
+    .stat-label{color:var(--muted); font-size:14px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <aside class="side">
+      <div class="brand"><div class="logo"></div><h1>NanoTrace Admin</h1></div>
+      <nav class="nav">
+        <a href="#dashboard">Overview</a>
+        <a href="#applications">Applications <span class="tag">12 pend.</span></a>
+        <a href="#certificates">Certificates</a>
+        <a href="#verifications">Verifications</a>
+        <a href="#customers">Customers</a>
+        <a href="#billing">Billing</a>
+        <div class="sep"></div>
+        <a href="#settings">Settings</a>
+        <a class="active" href="#audit">Audit Log</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <header class="top">
+        <div class="page-header">
+          <h1 class="page-title">Audit Log</h1>
+          <div class="filters">
+            <select class="btn">
+              <option>Last 24h</option>
+              <option>Last 7d</option>
+              <option>Last 30d</option>
+              <option>All Time</option>
+            </select>
+            <button class="btn brand">Export Log</button>
+          </div>
+        </div>
+      </header>
+      <section class="content">
+        <div class="stats-row">
+          <div class="card stat-card">
+            <div class="stat-number">2,847</div>
+            <div class="stat-label">Total Actions</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-number">156</div>
+            <div class="stat-label">Today's Activity</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-number">12</div>
+            <div class="stat-label">Active Users</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-number">0</div>
+            <div class="stat-label">Security Alerts</div>
+          </div>
+        </div>
+
+        <div class="search-bar">
+          <input type="text" class="search-input" placeholder="Search by user, action, or IP address..." id="auditSearch">
+          <select class="btn" id="userFilter">
+            <option value="">All Users</option>
+            <option value="admin">Admin Users</option>
+            <option value="regular">Regular Users</option>
+          </select>
+        </div>
+
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="all">All Actions</button>
+          <button class="filter-tab" data-filter="create">Create</button>
+          <button class="filter-tab" data-filter="update">Update</button>
+          <button class="filter-tab" data-filter="delete">Delete</button>
+          <button class="filter-tab" data-filter="login">Login</button>
+        </div>
+
+        <div class="card">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Action</th>
+                <th>Resource</th>
+                <th>Details</th>
+                <th>IP Address</th>
+                <th>User Agent</th>
+              </tr>
+            </thead>
+            <tbody id="auditTable"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Settings Page -->
+  <div class="wrap" id="settingsPage" style="display:none">
+    <aside class="side">
+      <div class="brand"><div class="logo"></div><h1>NanoTrace Admin</h1></div>
+      <nav class="nav">
+        <a href="#dashboard">Overview</a>
+        <a href="#applications">Applications <span class="tag">12 pend.</span></a>
+        <a href="#certificates">Certificates</a>
+        <a href="#verifications">Verifications</a>
+        <a href="#customers">Customers</a>
+        <a href="#billing">Billing</a>
+        <div class="sep"></div>
+        <a class="active" href="#settings">Settings</a>
+        <a href="#audit">Audit Log</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <header class="top">
+        <div class="page-header">
+          <h1 class="page-title">System Settings</h1>
+          <div class="filters">
+            <button class="btn">Backup Data</button>
+            <button class="btn brand">Save Changes</button>
+          </div>
+        </div>
+      </header>
+      <section class="content">
+        <div style="display:grid; grid-template-columns: 300px 1fr; gap:24px;">
+          <!-- Settings Navigation -->
+          <div class="card" style="height:fit-content">
+            <h3 style="margin:0 0 16px; color:var(--text)">Configuration</h3>
+            <nav class="nav" style="gap:4px">
+              <a class="active" href="#" onclick="showSettingsTab('general')">General Settings</a>
+              <a href="#" onclick="showSettingsTab('security')">Security & Auth</a>
+              <a href="#" onclick="showSettingsTab('notifications')">Notifications</a>
+              <a href="#" onclick="showSettingsTab('blockchain')">Blockchain Config</a>
+              <a href="#" onclick="showSettingsTab('integrations')">Integrations</a>
+              <a href="#" onclick="showSettingsTab('billing')">Billing Settings</a>
+              <a href="#" onclick="showSettingsTab('system')">System Info</a>
+            </nav>
+          </div>
+
+          <!-- Settings Content -->
+          <div>
+            <!-- General Settings -->
+            <div id="generalSettings" class="settings-tab">
+              <div class="card">
+                <h3 style="margin:0 0 16px">General Configuration</h3>
+                <div style="display:grid; gap:16px">
+                  <div>
+                    <label style="display:block; margin-bottom:8px; color:var(--muted); font-size:14px">Company Name</label>
+                    <input type="text" value="NanoTrace Certification Authority" style="width:100%; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--text)">
+                  </div>
+                  <div>
+                    <label style="display:block; margin-bottom:8px; color:var(--muted); font-size:14px">Admin Email</label>
+                    <input type="email" value="admin@nanotrace.org" style="width:100%; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--text)">
+                  </div>
+                  <div>
+                    <label style="display:block; margin-bottom:8px; color:var(--muted); font-size:14px">Default Certificate Validity (Days)</label>
+                    <input type="number" value="365" style="width:100%; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--text)">
+                  </div>
+                  <div>
+                    <label style="display:block; margin-bottom:8px; color:var(--muted); font-size:14px">Time Zone</label>
+                    <select style="width:100%; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--text)">
+                      <option>Europe/Dublin</option>
+                      <option>UTC</option>
+                      <option>Europe/London</option>
+                      <option>Europe/Berlin</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3 style="margin:0 0 16px">Application Settings</h3>
+                <div style="display:grid; gap:16px">
+                  <label style="display:flex; align-items:center; gap:12px; cursor:pointer">
+                    <input type="checkbox" checked style="transform:scale(1.2)">
+                    <span>Enable automatic certificate approval for trusted customers</span>
+                  </label>
+                  <label style="display:flex; align-items:center; gap:12px; cursor:pointer">
+                    <input type="checkbox" checked style="transform:scale(1.2)">
+                    <span>Send email notifications for new applications</span>
+                  </label>
+                  <label style="display:flex; align-items:center; gap:12px; cursor:pointer">
+                    <input type="checkbox" style="transform:scale(1.2)">
+                    <span>Enable maintenance mode</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div id="securitySettings" class="settings-tab" style="display:none">
+              <div class="card">
+                <h3 style="margin:0 0 16px">Authentication & Security</h3>
+                <div style="display:grid; gap:16px">
+                  <div>
+                    <label style="display:block; margin-bottom:8px; color:var(--muted); font-size:14px">Session Timeout (Minutes)</label>
+                    <input type="number" value="60" style="width:100%; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--text)">
+                  </div>
+                  <div>
+                    <label style="display:block; margin-bottom:8px; color:var(--muted); font-size:14px">Maximum Login Attempts</label>
+                    <input type="number" value="5" style="width:100%; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--text)">
+                  </div>
+                  <label style="display:flex; align-items:center; gap:12px; cursor:pointer">
+                    <input type="checkbox" checked style="transform:scale(1.2)">
+                    <span>Require two-factor authentication for admin users</span>
+                  </label>
+                  <label style="display:flex; align-items:center; gap:12px; cursor:pointer">
+                    <input type="checkbox" checked style="transform:scale(1.2)">
+                    <span>Enable IP-based access restrictions</span>
+                  </label>
+                  <label style="display:flex; align-items:center; gap:12px; cursor:pointer">
+                    <input type="checkbox" style="transform:scale(1.2)">
+                    <span>Force password reset every 90 days</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3 style="margin:0 0 16px">Allowed IP Addresses</h3>
+                <textarea placeholder="Enter IP addresses or ranges, one per line..." style="width:100%; height:120px; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--text); resize:vertical">192.168.1.0/24
+10.0.0.0/8</textarea>
+                <p style="font-size:12px; color:var(--muted); margin-top:8px">Leave empty to allow all IP addresses</p>
+              </div>
+            </div>
+
+            <!-- Notifications Settings -->
+            <div id="notificationsSettings" class="settings-tab" style="display:none">
+              <div class="card">
+                <h3 style="margin:0 0 16px">Email Notifications</h3>
+                <div style="display:grid; gap:16px">
+                  <div>
+                    <label style="display:block; margin-bottom:8px; color:var(--muted); font-size:14px">SMTP Server</label>
+                    <input type="text" value="smtp.nanotrace.org" style="width:100%; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--text)">
+                  </div>
+                  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px">
+                    <div>
+                      <label style="display:block; margin-bottom:8px; color:var(--muted); font-size:14px">Port</label>
+                      <input type="number" value="587" style="width:100%; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--text)">
+                    </div>
+                    <div>
+                      <label style="display:block; margin-bottom:8px; color:var(--muted); font-size:14px">Encryption</label>
+                      <select style="width:100%; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--text)">
+                        <option>TLS</option>
+                        <option>SSL</option>
+                        <option>None</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div>
+                    <label style="display:block; margin-bottom:8px; color:var(--muted); font-size:14px">Username</label>
+                    <input type="text" value="notifications@nanotrace.org" style="width:100%; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--text)">
+                  </div>
+                  <div>
+                    <label style="display:block; margin-bottom:8px; color:var(--muted); font-size:14px">Password</label>
+                    <input type="password" value="••••••••" style="width:100%; padding:12px; background:var(--card); border:1px solid var(--border); border-radius:8px; color:var(--text)">
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3 style="margin:0 0 16px">Notification Types</h3>
+                <div style="display:grid; gap:12px">
+                  <label style="display:flex; align-items:center; gap:12px; cursor:pointer">
+                    <input type="checkbox" checked style="transform:scale(1.2)">
+                    <span>New certificate applications</span>
+                  </label>
+                  <label style="display:flex; align-items:center; gap:12px; cursor:pointer">
+                    <input type="checkbox" checked style="transform:scale(1.2)">
+                    <span>Certificate approvals/rejections</span>
+                  </label>
+                  <label style="display:flex; align-items:center; gap:12px; cursor:pointer">
+                    <input type="checkbox" checked style="transform:scale(1.2)">
+                    <span>Certificate expirations (30 days before)</span>
+                  </label>
+                  <label style="display:flex; align-items:center; gap:12px; cursor:pointer">
+                    <input type="checkbox" style="transform:scale(1.2)">
+                    <span>Payment confirmations</span>
+                  </label>
+                  <label style="display:flex; align-items:center; gap:12px; cursor:pointer">
+                    <input type="checkbox" checked style="transform:scale(1.2)">
+                    <span>System alerts and security notices</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- System Info -->
+            <div id="systemSettings" class="settings-tab" style="display:none">
+              <div class="card">
+                <h3 style="margin:0 0 16px">System Information</h3>
+                <div style="display:grid; gap:12px; font-family:monospace; font-size:14px">
+                  <div style="display:flex; justify-content:space-between">
+                    <span style="color:var(--muted)">Version:</span>
+                    <span>v2.1.4</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between">
+                    <span style="color:var(--muted)">Last Updated:</span>
+                    <span>2025-01-28 09:32 UTC</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between">
+                    <span style="color:var(--muted)">Uptime:</span>
+                    <span style="color:var(--ok)">7 days, 14:23:15</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between">
+                    <span style="color:var(--muted)">Database:</span>
+                    <span style="color:var(--ok)">Connected (PostgreSQL 16.1)</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between">
+                    <span style="color:var(--muted)">Blockchain Node:</span>
+                    <span style="color:var(--ok)">Healthy (Fabric 2.5.4)</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between">
+                    <span style="color:var(--muted)">Storage Used:</span>
+                    <span>2.3 GB / 100 GB</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between">
+                    <span style="color:var(--muted)">Memory Usage:</span>
+                    <span>1.2 GB / 8 GB</span>
+                  </div>
+                  <div style="display:flex; justify-content:space-between">
+                    <span style="color:var(--muted)">SSL Certificate:</span>
+                    <span style="color:var(--ok)">Valid (expires 2025-07-28)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3 style="margin:0 0 16px">Maintenance Actions</h3>
+                <div style="display:grid; gap:12px">
+                  <button class="btn">Clear Application Cache</button>
+                  <button class="btn">Optimize Database</button>
+                  <button class="btn">Update SSL Certificate</button>
+                  <button class="btn" style="background:var(--danger); border-color:var(--danger)">Restart System Services</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Mock audit data
+    const auditLogs = [
+      {timestamp: '2025-01-28 14:32:15', user: 'admin@nanotrace.org', action: 'approve', type: 'update', resource: 'Certificate', details: 'Approved NT-2025-128 for NanoBio Ltd', ip: '185.23.45.67', userAgent: 'Chrome 120.0'},
+      {timestamp: '2025-01-28 14:31:42', user: 'john.doe@nanotrace.org', action: 'login', type: 'login', resource: 'System', details: 'Admin panel login successful', ip: '89.45.67.123', userAgent: 'Firefox 121.0'},
+      {timestamp: '2025-01-28 14:30:18', user: 'admin@nanotrace.org', action: 'reject', type: 'update', resource: 'Certificate', details: 'Rejected NT-2025-999 - Invalid documentation', ip: '185.23.45.67', userAgent: 'Chrome 120.0'},
+      {timestamp: '2025-01-28 14:29:55', user: 'sarah.chen@nanobio.ie', action: 'apply', type: 'create', resource: 'Certificate', details: 'New application for nano-silver coating', ip: '195.67.89.12', userAgent: 'Safari 17.2'},
+      {timestamp: '2025-01-28 14:28:33', user: 'admin@nanotrace.org', action: 'create', type: 'create', resource: 'User', details: 'Created new admin user account', ip: '185.23.45.67', userAgent: 'Chrome 120.0'},
+      {timestamp: '2025-01-28 14:27:10', user: 'mueller@microcore.de', action: 'view', type: 'read', resource: 'Certificate', details: 'Viewed certificate NT-2025-127', ip: '78.123.45.89', userAgent: 'Edge 120.0'}
+    ];
+
+    function renderAuditLogs(logs = auditLogs) {
+      const tbody = document.getElementById('auditTable');
+      tbody.innerHTML = logs.map(log => `
+        <tr>
+          <td class="audit-timestamp">${log.timestamp}</td>
+          <td class="audit-user">${log.user.split('@')[0]}</td>
+          <td><span class="badge b-${log.type}">${log.action.toUpperCase()}</span></td>
+          <td>${log.resource}</td>
+          <td class="audit-details">${log.details}</td>
+          <td class="ip-address">${log.ip}</td>
+          <td style="max-width:120px; overflow:hidden; text-overflow:ellipsis">${log.userAgent}</td>
+        </tr>
+      `).join('');
+    }
+
+    // Filter functionality
+    document.querySelectorAll('.filter-tab').forEach(tab => {
+      tab.addEventListener('click', (e) => {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        e.target.classList.add('active');
+        
+        const filter = e.target.dataset.filter;
+        if(filter === 'all') {
+          renderAuditLogs(auditLogs);
+        } else {
+          const filtered = auditLogs.filter(log => log.type === filter);
+          renderAuditLogs(filtered);
+        }
+      });
+    });
+
+    // Search functionality
+    document.getElementById('auditSearch').addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      const filtered = auditLogs.filter(log => 
+        log.user.toLowerCase().includes(query) || 
+        log.action.toLowerCase().includes(query) ||
+        log.ip.includes(query) ||
+        log.details.toLowerCase().includes(query)
+      );
+      renderAuditLogs(filtered);
+    });
+
+    // Settings tab switching
+    function showSettingsTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.settings-tab').forEach(tab => tab.style.display = 'none');
+      // Show selected tab
+      document.getElementById(tabName + 'Settings').style.display = 'block';
+      
+      // Update navigation
+      document.querySelectorAll('#settingsPage .nav a').forEach(a => a.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    // Navigation between pages
+    document.querySelectorAll('.nav a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault();
+        const href = e.target.getAttribute('href');
+        
+        if(href === '#settings') {
+          document.querySelector('.wrap').style.display = 'none';
+          document.getElementById('settingsPage').style.display = 'grid';
+        } else if(href === '#audit') {
+          document.querySelector('.wrap').style.display = 'grid';
+          document.getElementById('settingsPage').style.display = 'none';
+        } else {
+          // Handle other navigation
+          document.querySelector('.wrap').style.display = 'grid';
+          document.getElementById('settingsPage').style.display = 'none';
+        }
+      });
+    });
+
+    // Initialize audit logs
+    renderAuditLogs();
+
+    // Simulate real-time audit updates
+    setInterval(() => {
+      if(Math.random() > 0.8) {
+        const actions = ['login', 'view', 'approve', 'apply', 'update'];
+        const users = ['admin@nanotrace.org', 'john.doe@nanotrace.org', 'sarah.chen@nanobio.ie'];
+        const resources = ['Certificate', 'User', 'System', 'Application'];
+        
+        const newLog = {
+          timestamp: new Date().toISOString().slice(0,19).replace('T', ' '),
+          user: users[Math.floor(Math.random() * users.length)],
+          action: actions[Math.floor(Math.random() * actions.length)],
+          type: Math.random() > 0.5 ? 'update' : 'create',
+          resource: resources[Math.floor(Math.random() * resources.length)],
+          details: 'Automated system action',
+          ip: `${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`,
+          userAgent: 'Chrome 120.0'
+        };
+        
+        auditLogs.unshift(newLog);
+        if(auditLogs.length > 50) auditLogs.pop();
+        renderAuditLogs();
+      }
+    }, 10000);
+
+    // Form validation and saving
+    document.querySelectorAll('input, select, textarea').forEach(input => {
+      input.addEventListener('change', () => {
+        // Mark form as modified
+        const saveBtn = document.querySelector('.btn.brand');
+        if(saveBtn && saveBtn.textContent === 'Save Changes') {
+          saveBtn.style.background = 'var(--warn)';
+          saveBtn.textContent = 'Save Changes*';
+        }
+      });
+    });
+
+    // Save changes functionality
+    document.addEventListener('click', (e) => {
+      if(e.target.classList.contains('brand') && e.target.textContent.includes('Save Changes')) {
+        e.target.style.background = 'var(--ok)';
+        e.target.textContent = 'Changes Saved';
+        setTimeout(() => {
+          e.target.style.background = 'linear-gradient(180deg, #1c3b2d, #12261f)';
+          e.target.textContent = 'Save Changes';
+        }, 2000);
+      }
+    });
+  </script>
+</body>
+</html>

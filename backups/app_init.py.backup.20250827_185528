@@ -1,0 +1,63 @@
+# backend/app/__init__.py
+
+from flask import Flask, abort, request
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager
+from flask_mail import Mail
+from flask_migrate import Migrate
+from backend.config.config import Config
+
+db = SQLAlchemy()
+login_manager = LoginManager()
+mail = Mail()
+migrate = Migrate()
+
+def create_app():
+    app = Flask(__name__)
+
+    # behind Nginx: trust forwarded proto/host so URL generation + redirects are correct
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=0)
+
+    # load configuration (ensure Config has SERVER_NAME="nanotrace.org", etc.)
+    app.config.from_object(Config)
+
+    # extensions
+    db.init_app(app)
+    login_manager.init_app(app)
+    mail.init_app(app)
+    migrate.init_app(app, db)
+    login_manager.login_view = 'auth.login'
+
+    # ---- Global safety hook: block web privilege escalation via query/form ----
+    def _is_admin_user():
+        try:
+            from flask_login import current_user
+            return bool(getattr(current_user, "is_authenticated", False) and getattr(current_user, "is_admin", False))
+        except Exception:
+            return False
+
+    @app.before_request
+    def _block_role_escalation():
+        # prevent setting admin-ish flags via URL / form unless already admin
+        suspect_keys = ("is_admin", "role")
+        if any(k in request.values for k in suspect_keys) and not _is_admin_user():
+            abort(400)
+
+    # ---- Blueprints ----
+    from .views.auth import bp as auth_bp         # usually no internal url_prefix
+    from .views.main import bp as main_bp
+    from .views.certificates import bp as cert_bp # usually expects url_prefix='/certificate'
+    from backend.app.admin import bp as admin_bp  # this bp already has url_prefix='/admin'
+
+    # root site
+    app.register_blueprint(main_bp)
+
+    # subdomains (DNS + Config.SERVER_NAME must be set, e.g., "nanotrace.org")
+    # keep url_prefix for auth/cert to maintain existing paths,
+    # omit url_prefix for admin here because its Blueprint already defines '/admin'
+    # https://auth.nanotrace.org/auth/...
+    app.register_blueprint(cert_bp, subdomain='cert', url_prefix='/certificate')   # https://cert.nanotrace.org/certificate/...
+    app.register_blueprint(admin_bp, subdomain='admin')                            # https://admin.nanotrace.org/admin/...
+
+    return app

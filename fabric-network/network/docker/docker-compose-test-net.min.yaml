@@ -1,0 +1,39 @@
+version: '3.7'
+networks: { fabric_test: {} }
+
+services:
+  orderer.example.com:
+    image: hyperledger/fabric-orderer:2.5.4
+    container_name: orderer.example.com
+    command: orderer
+    environment:
+      - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
+      - ORDERER_GENERAL_LISTENPORT=7050
+      - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
+      - ORDERER_GENERAL_TLS_ENABLED=false
+    ports: [ "7050:7050" ]
+    networks: [ fabric_test ]
+
+  peer0.org1.example.com:
+    image: hyperledger/fabric-peer:2.5.4
+    container_name: peer0.org1.example.com
+    command: peer node start
+    environment:
+      - CORE_PEER_ID=peer0.org1.example.com
+      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_TLS_ENABLED=false
+    ports: [ "7051:7051" ]
+    networks: [ fabric_test ]
+
+  ca.org1.example.com:
+    image: hyperledger/fabric-ca:1.5.7
+    container_name: ca.org1.example.com
+    command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
+    environment:
+      - FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server
+      - FABRIC_CA_SERVER_CA_NAME=ca-org1
+      - FABRIC_CA_SERVER_PORT=7054
+    ports: [ "7054:7054" ]
+    networks: [ fabric_test ]

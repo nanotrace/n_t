@@ -1,0 +1,18 @@
+[Unit]
+Description=NanoTrace Main Site (nanotrace.org)
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=michal
+Group=www-data
+WorkingDirectory=/home/michal/NanoTrace/backend
+Environment="FLASK_ENV=production"
+Environment="PYTHONPATH=/home/michal/NanoTrace"
+EnvironmentFile=/home/michal/NanoTrace/.env
+ExecStart=/home/michal/NanoTrace/venv/bin/gunicorn --bind 127.0.0.1:8000 --workers 2 wsgi_main:app
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

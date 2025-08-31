@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+  <head><title>Verify Certificate</title><link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script defer src="{{ url_for('static', filename='js/nanotrace.js') }}"></script>
+</head>
+  <body>
+    {% if error %}
+      <p>{{ error }}</p>
+    {% else %}
+      <h2>Certificate: {{ cert.product_name }}</h2>
+      <p>Nano Material: {{ cert.nano_material }}</p>
+      <p>Supplier: {{ cert.supplier }}</p>
+      <p>Status: {{ cert.status }}</p>
+      <p>Cert ID: {{ cert.cert_id }}</p>
+    {% endif %}
+  </body>
+</html>

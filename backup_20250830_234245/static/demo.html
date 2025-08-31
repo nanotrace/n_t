@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NanoTrace - Enhanced UI Demo</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script defer src="js/nanotrace.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>NanoTrace</h1>
+            <div class="tagline">Blockchain-Backed Nanotechnology Certification</div>
+            <div class="subtitle">Enhanced UI Demo - Complete Styling System</div>
+        </div>
+
+        <!-- Demo Section -->
+        <div class="card">
+            <h2 class="text-center mb-3">Enhanced UI Features Demo</h2>
+            
+            <div class="demo-section">
+                <div class="demo-buttons">
+                    <button class="btn btn-primary" data-loading>Primary Action</button>
+                    <button class="btn btn-success">Success Button</button>
+                    <button class="btn btn-warning">Warning Button</button>
+                    <button class="btn btn-danger">Danger Button</button>
+                    <button class="btn btn-secondary">Secondary</button>
+                </div>
+            </div>
+
+            <!-- Status Cards -->
+            <div class="cert-details">
+                <div class="status-card valid">
+                    <div class="text-center">
+                        <div class="status-icon valid">✅</div>
+                        <h3>Certificate Valid</h3>
+                        <p>This certificate has been verified and is active.</p>
+                        <span class="security-level high">High Security</span>
+                    </div>
+                </div>
+                
+                <div class="status-card invalid">
+                    <div class="text-center">
+                        <div class="status-icon invalid">❌</div>
+                        <h3>Certificate Invalid</h3>
+                        <p>This certificate could not be verified.</p>
+                        <span class="security-level low">Low Security</span>
+                    </div>
+                </div>
+                
+                <div class="status-card pending">
+                    <div class="text-center">
+                        <div class="status-icon pending">⏳</div>
+                        <h3>Pending Approval</h3>
+                        <p>This certificate is awaiting admin approval.</p>
+                        <span class="security-level medium">Medium Security</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Demo -->
+        <div class="card">
+            <h3 class="mb-3">Enhanced Form with Validation</h3>
+            <form>
+                <div class="form-group">
+                    <label for="demo-email">Email Address *</label>
+                    <input type="email" id="demo-email" class="form-control" required 
+                           placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="demo-product">Product Name *</label>
+                    <input type="text" id="demo-product" class="form-control" required 
+                           minlength="3" placeholder="Enter product name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="demo-material">Nano Material Type</label>
+                    <select id="demo-material" class="form-control">
+                        <option value="">Select material type</option>
+                        <option value="carbon-nanotube">Carbon Nanotube</option>
+                        <option value="silver-nanoparticle">Silver Nanoparticle</option>
+                        <option value="titanium-dioxide">Titanium Dioxide</option>
+                        <option value="graphene">Graphene</option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Submit Application</button>
+            </form>
+        </div>
+
+        <!-- Certificate Details Demo -->
+        <div class="card">
+            <h3 class="mb-3">Certificate Information</h3>
+            <div class="cert-details">
+                <div class="cert-detail-item">
+                    <div class="cert-detail-label">Certificate ID</div>
+                    <div class="cert-detail-value">NANO-CERT-2025-001</div>
+                </div>
+                
+                <div class="cert-detail-item">
+                    <div class="cert-detail-label">Product Name</div>
+                    <div class="cert-detail-value">Advanced Carbon Nanotube Array</div>
+                </div>
+                
+                <div class="cert-detail-item">
+                    <div class="cert-detail-label">Material Type</div>
+                    <div class="cert-detail-value">Multi-Wall Carbon Nanotube</div>
+                </div>
+                
+                <div class="cert-detail-item">
+                    <div class="cert-detail-label">Certification Date</div>
+                    <div class="cert-detail-value">August 30, 2025</div>
+                </div>
+                
+                <div class="cert-detail-item">
+                    <div class="cert-detail-label">Expiry Date</div>
+                    <div class="cert-detail-value">August 30, 2026</div>
+                </div>
+                
+                <div class="cert-detail-item">
+                    <div class="cert-detail-label">Blockchain Hash</div>
+                    <div class="cert-detail-value">0x4f3d2e1a8b9c5d6e7f8a9b0c1d2e3f4</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Progress Demo -->
+        <div class="card">
+            <h3 class="mb-3">Certification Progress</h3>
+            
+            <div class="cert-chain">
+                <div class="cert-chain-item" data-step="1">
+                    <h4>Application Submitted</h4>
+                    <p>Your certification request has been received and is being processed.</p>
+                    <div class="progress">
+                        <div class="progress-bar" data-width="100%"></div>
+                    </div>
+                </div>
+                
+                <div class="cert-chain-item" data-step="2">
+                    <h4>Document Review</h4>
+                    <p>Our experts are reviewing your documentation and compliance materials.</p>
+                    <div class="progress">
+                        <div class="progress-bar" data-width="75%"></div>
+                    </div>
+                </div>
+                
+                <div class="cert-chain-item" data-step="3">
+                    <h4>Blockchain Registration</h4>
+                    <p>Certificate will be registered on the blockchain upon approval.</p>
+                    <div class="progress">
+                        <div class="progress-bar" data-width="25%"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Demo -->
+        <div class="card">
+            <h3 class="mb-3">System Notifications</h3>
+            
+            <div class="alert alert-success" role="alert">
+                <strong>Success!</strong> Your certificate has been approved and issued.
+            </div>
+            
+            <div class="alert alert-info" role="alert">
+                <strong>Information:</strong> New blockchain verification features are now available.
+            </div>
+            
+            <div class="alert alert-warning" role="alert">
+                <strong>Warning:</strong> Your certificate will expire in 30 days. Please renew.
+            </div>
+            
+            <div class="alert alert-danger" role="alert">
+                <strong>Error:</strong> Certificate verification failed. Please contact support.
+            </div>
+        </div>
+
+        <!-- Table Demo -->
+        <div class="card">
+            <h3 class="mb-3">Recent Certificates</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Certificate ID</th>
+                        <th>Product</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>NANO-001</td>
+                        <td>Carbon Nanotube Array</td>
+                        <td><span class="security-level high">Approved</span></td>
+                        <td>2025-08-30</td>
+                        <td><button class="btn btn-sm btn-secondary">View</button></td>
+                    </tr>
+                    <tr>
+                        <td>NANO-002</td>
+                        <td>Silver Nanoparticles</td>
+                        <td><span class="security-level medium">Pending</span></td>
+                        <td>2025-08-29</td>
+                        <td><button class="btn btn-sm btn-secondary">View</button></td>
+                    </tr>
+                    <tr>
+                        <td>NANO-003</td>
+                        <td>Graphene Composite</td>
+                        <td><span class="security-level high">Approved</span></td>
+                        <td>2025-08-28</td>
+                        <td><button class="btn btn-sm btn-secondary">View</button></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Code Demo -->
+        <div class="card">
+            <h3 class="mb-3">API Integration Example</h3>
+            <pre><code>// Verify certificate via API
+const response = await fetch('/api/verify', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    certificateId: 'NANO-CERT-2025-001'
+  })
+});
+
+const result = await response.json();
+console.log('Verification result:', result);</code></pre>
+        </div>
+
+        <!-- Interactive Demo -->
+        <div class="card">
+            <h3 class="mb-3">Interactive Features Demo</h3>
+            
+            <div class="text-center">
+                <button class="btn btn-primary" onclick="nanotrace.showNotification('Success! This is a test notification.', 'success')">
+                    Show Success Notification
+                </button>
+                
+                <button class="btn btn-warning" onclick="nanotrace.showNotification('Warning: This is a test warning.', 'warning')">
+                    Show Warning Notification  
+                </button>
+                
+                <button class="btn btn-danger" onclick="nanotrace.showNotification('Error: This is a test error.', 'error')">
+                    Show Error Notification
+                </button>
+                
+                <button class="btn btn-secondary" onclick="nanotrace.showNotification('Info: This is informational.', 'info')">
+                    Show Info Notification
+                </button>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <p data-tooltip="This is a tooltip demo!">Hover over this text to see a tooltip</p>
+                <p>Try the theme toggle in the bottom-right corner!</p>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-back">
+            <a href="/">← Back to Main Application</a>
+        </div>
+    </div>
+
+    <script>
+        // Make nanotrace globally accessible for demo buttons
+        window.nanotrace = window.nanotrace || {};
+        
+        // Wait for NanoTrace to be initialized
+        setTimeout(() => {
+            const nt = document.querySelector('script[src*="nanotrace.js"]')?.__nanotraceInstance;
+            if (nt) {
+                window.nanotrace = nt;
+            } else {
+                // Fallback notification function
+                window.nanotrace.showNotification = (message, type) => {
+                    alert(`${type.toUpperCase()}: ${message}`);
+                };
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,512 @@
+<!-- Applications Page -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Applications - NanoTrace Admin</title>
+  <style>
+    :root{
+      --bg:#0b1220;
+      --panel:#111a2e;
+      --muted:#8892a6;
+      --text:#e6eef9;
+      --brand:#39c27f;
+      --brand-2:#4ca3ff;
+      --warn:#ffb020;
+      --danger:#ff5d5d;
+      --ok:#2ec27e;
+      --card:#0f1629;
+      --border:rgba(255,255,255,0.08);
+      --shadow: 0 6px 24px rgba(0,0,0,0.35);
+      --radius:20px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(1200px 800px at 10% -10%, rgba(76,163,255,0.12), transparent 60%),
+                  radial-gradient(1200px 800px at 110% 10%, rgba(57,194,127,0.10), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit;text-decoration:none}
+    .wrap{display:grid;grid-template-columns: 260px 1fr; min-height:100%}
+    
+    /* Sidebar */
+    .side{
+      background:linear-gradient(180deg, #0d1730, #0a1122);
+      border-right:1px solid var(--border);
+      padding:24px 18px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px; margin-bottom:28px;
+    }
+    .brand .logo{
+      width:40px; height:40px; border-radius:12px;
+      background: url('/static/images/N_T_logo.png') center/cover;
+      box-shadow: inset 0 0 20px rgba(255,255,255,0.25);
+    }
+    .brand h1{font-size:18px; letter-spacing:.4px; margin:0}
+    .nav{display:flex; flex-direction:column; gap:8px}
+    .nav a{
+      padding:10px 12px; border-radius:12px; color:var(--muted);
+      display:flex; align-items:center; gap:10px; cursor:pointer;
+    }
+    .nav a.active, .nav a:hover{ background:rgba(76,163,255,0.12); color:#d9e6ff}
+    .tag{font-size:10px; padding:2px 8px; border-radius:999px; background:rgba(57,194,127,.15); color:#b8ffd9; margin-left:auto}
+    .sep{height:1px; background:var(--border); margin:14px 0}
+    
+    /* Main content */
+    .main{display:grid; grid-template-rows: auto 1fr; }
+    .top{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 24px; border-bottom:1px solid var(--border);
+    }
+    .content{ padding:24px; }
+    
+    .page-header{
+      display:flex; justify-content:space-between; align-items:center;
+      margin-bottom:24px;
+    }
+    .page-title{font-size:24px; font-weight:600; margin:0}
+    .filters{
+      display:flex; gap:12px; align-items:center;
+    }
+    .btn{
+      background:linear-gradient(180deg, #1b2b4d, #15223f);
+      border:1px solid var(--border);
+      color:#e6eef9; padding:10px 14px; border-radius:12px; cursor:pointer;
+    }
+    .btn.brand{ background:linear-gradient(180deg, #1c3b2d, #12261f); border-color:rgba(57,194,127,.3)}
+    .btn:hover{filter:brightness(1.05)}
+    
+    /* Cards and tables */
+    .card{
+      background:linear-gradient(180deg, #0f182d, #0b1220);
+      border:1px solid var(--border);
+      border-radius:var(--radius); padding:18px; box-shadow:var(--shadow);
+      margin-bottom:18px;
+    }
+    .table{ width:100%; border-collapse: collapse; }
+    .table th, .table td{ padding:12px 10px; border-bottom:1px solid var(--border); color:#cdd6ea; font-size:14px; text-align:left}
+    .table th{background:#0a1122; font-weight:600; color:#a4afc6}
+    .badge{ padding:4px 12px; border-radius:999px; font-size:12px; font-weight:500}
+    .b-pending{ background:rgba(255,176,32,.12); color:#ffd28a; border:1px solid rgba(255,176,32,.3)}
+    .b-approved{ background:rgba(57,194,127,.12); color:#b8ffd9; border:1px solid rgba(57,194,127,.3)}
+    .b-rejected{ background:rgba(255,93,93,.12); color:#ffc3c3; border:1px solid rgba(255,93,93,.3)}
+    .b-under-review{ background:rgba(76,163,255,.12); color:#bde0ff; border:1px solid rgba(76,163,255,.3)}
+    
+    .action-btns{display:flex; gap:8px}
+    .btn-sm{padding:6px 12px; font-size:12px; border-radius:8px}
+    .btn-approve{background:var(--ok); color:white; border:none}
+    .btn-reject{background:var(--danger); color:white; border:none}
+    .btn-view{background:var(--brand-2); color:white; border:none}
+    
+    /* Modal */
+    .modal{
+      display:none; position:fixed; top:0; left:0; width:100%; height:100%;
+      background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;
+    }
+    .modal.show{display:flex}
+    .modal-content{
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--radius); padding:24px; max-width:500px; width:90%;
+    }
+    .modal-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px}
+    .modal-title{font-size:18px; font-weight:600; margin:0}
+    .close{background:none; border:none; color:var(--muted); font-size:24px; cursor:pointer}
+    textarea{
+      width:100%; background:var(--bg); border:1px solid var(--border);
+      color:var(--text); padding:12px; border-radius:8px; resize:vertical; min-height:100px;
+    }
+  </style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script defer src="{{ url_for('static', filename='js/nanotrace.js') }}"></script>
+</head>
+<body>
+  <div class="wrap">
+    <aside class="side">
+      <div class="brand">
+        <div class="logo"></div>
+        <h1>NanoTrace Admin</h1>
+      </div>
+      <nav class="nav">
+        <a href="dashboard.html">Overview</a>
+        <a class="active" href="applications.html">Applications <span class="tag">12 pend.</span></a>
+        <a href="certificates.html">Certificates</a>
+        <a href="verifications.html">Verifications</a>
+        <a href="customers.html">Customers</a>
+        <a href="billing.html">Billing</a>
+        <div class="sep"></div>
+        <a href="settings.html">Settings</a>
+        <a href="audit.html">Audit Log</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="top">
+        <div class="page-header">
+          <h1 class="page-title">Certificate Applications</h1>
+          <div class="filters">
+            <select class="btn" id="statusFilter">
+              <option value="">All Status</option>
+              <option value="pending">Pending</option>
+              <option value="under-review">Under Review</option>
+              <option value="approved">Approved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <select class="btn" id="tierFilter">
+              <option value="">All Tiers</option>
+              <option value="standard">Standard</option>
+              <option value="premium">Premium</option>
+              <option value="enterprise">Enterprise</option>
+            </select>
+            <button class="btn brand">Export</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="content">
+        <div class="card">
+          <table class="table" id="applicationsTable">
+            <thead>
+              <tr>
+                <th>Application ID</th>
+                <th>Company</th>
+                <th>Product</th>
+                <th>Nanomaterial</th>
+                <th>Tier</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- Approve Modal -->
+  <div id="approveModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Approve Application</h3>
+        <button class="close">&times;</button>
+      </div>
+      <textarea id="approveNotes" placeholder="Add approval notes (optional)..."></textarea>
+      <div style="display:flex; gap:12px; margin-top:16px; justify-content:flex-end">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-approve" onclick="confirmApprove()">Approve</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reject Modal -->
+  <div id="rejectModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 class="modal-title">Reject Application</h3>
+        <button class="close">&times;</button>
+      </div>
+      <textarea id="rejectReason" placeholder="Reason for rejection (required)..." required></textarea>
+      <div style="display:flex; gap:12px; margin-top:16px; justify-content:flex-end">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-reject" onclick="confirmReject()">Reject</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentAppId = null;
+    
+    // Mock data
+    const applications = [
+      {id: 'NT-2025-001', company: 'NanoBio Ltd', product: 'Carbon Nanotube Composite', material: 'Carbon Nanotubes', tier: 'premium', status: 'pending', date: '2025-01-15'},
+      {id: 'NT-2025-002', company: 'MicroCore GmbH', product: 'Silver Antimicrobial Coating', material: 'Silver Nanoparticles', tier: 'standard', status: 'under-review', date: '2025-01-14'},
+      {id: 'NT-2025-003', company: 'AeroPart Co', product: 'Titanium Oxide Photocatalyst', material: 'Titanium Dioxide', tier: 'enterprise', status: 'pending', date: '2025-01-13'},
+      {id: 'NT-2025-004', company: 'BioTrace SA', product: 'Quantum Dot Display', material: 'Quantum Dots', tier: 'premium', status: 'approved', date: '2025-01-12'},
+      {id: 'NT-2025-005', company: 'GrapheneX', product: 'Graphene Supercapacitor', material: 'Graphene', tier: 'standard', status: 'rejected', date: '2025-01-11'}
+    ];
+
+    function renderApplications(data) {
+      const tbody = document.querySelector('#applicationsTable tbody');
+      tbody.innerHTML = '';
+      
+      data.forEach(app => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${app.id}</td>
+          <td>${app.company}</td>
+          <td>${app.product}</td>
+          <td>${app.material}</td>
+          <td>${app.tier.charAt(0).toUpperCase() + app.tier.slice(1)}</td>
+          <td><span class="badge b-${app.status}">${app.status.replace('-', ' ').toUpperCase()}</span></td>
+          <td>${app.date}</td>
+          <td>
+            <div class="action-btns">
+              <button class="btn btn-sm btn-view" onclick="viewApplication('${app.id}')">View</button>
+              ${app.status === 'pending' ? `
+                <button class="btn btn-sm btn-approve" onclick="showApproveModal('${app.id}')">Approve</button>
+                <button class="btn btn-sm btn-reject" onclick="showRejectModal('${app.id}')">Reject</button>
+              ` : ''}
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function showApproveModal(appId) {
+      currentAppId = appId;
+      document.getElementById('approveModal').classList.add('show');
+    }
+
+    function showRejectModal(appId) {
+      currentAppId = appId;
+      document.getElementById('rejectModal').classList.add('show');
+    }
+
+    function closeModal() {
+      document.querySelectorAll('.modal').forEach(modal => modal.classList.remove('show'));
+      currentAppId = null;
+    }
+
+    function confirmApprove() {
+      const notes = document.getElementById('approveNotes').value;
+      // API call would go here
+      console.log(`Approving ${currentAppId} with notes: ${notes}`);
+      closeModal();
+      // Refresh table
+      renderApplications(applications);
+    }
+
+    function confirmReject() {
+      const reason = document.getElementById('rejectReason').value;
+      if (!reason.trim()) {
+        alert('Rejection reason is required');
+        return;
+      }
+      // API call would go here
+      console.log(`Rejecting ${currentAppId} with reason: ${reason}`);
+      closeModal();
+      // Refresh table
+      renderApplications(applications);
+    }
+
+    function viewApplication(appId) {
+      // Navigate to detail view
+      console.log(`Viewing application ${appId}`);
+    }
+
+    // Filter functionality
+    document.getElementById('statusFilter').addEventListener('change', function() {
+      const status = this.value;
+      const filtered = status ? applications.filter(app => app.status === status) : applications;
+      renderApplications(filtered);
+    });
+
+    document.getElementById('tierFilter').addEventListener('change', function() {
+      const tier = this.value;
+      const filtered = tier ? applications.filter(app => app.tier === tier) : applications;
+      renderApplications(filtered);
+    });
+
+    // Close modals when clicking outside
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+      });
+    });
+
+    // Close modals with X button
+    document.querySelectorAll('.close').forEach(btn => {
+      btn.addEventListener('click', closeModal);
+    });
+
+    // Initial render
+    renderApplications(applications);
+  </script>
+</body>
+</html>
+
+<!-- Certificates Page -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Certificates - NanoTrace Admin</title>
+  <style>
+    /* Same styles as applications page */
+    :root{
+      --bg:#0b1220; --panel:#111a2e; --muted:#8892a6; --text:#e6eef9;
+      --brand:#39c27f; --brand-2:#4ca3ff; --warn:#ffb020; --danger:#ff5d5d;
+      --ok:#2ec27e; --card:#0f1629; --border:rgba(255,255,255,0.08);
+      --shadow: 0 6px 24px rgba(0,0,0,0.35); --radius:20px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(1200px 800px at 10% -10%, rgba(76,163,255,0.12), transparent 60%),
+                  radial-gradient(1200px 800px at 110% 10%, rgba(57,194,127,0.10), transparent 60%), var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit;text-decoration:none}
+    .wrap{display:grid;grid-template-columns: 260px 1fr; min-height:100%}
+    .side{background:linear-gradient(180deg, #0d1730, #0a1122); border-right:1px solid var(--border); padding:24px 18px;}
+    .brand{display:flex; align-items:center; gap:12px; margin-bottom:28px;}
+    .brand .logo{width:40px; height:40px; border-radius:12px; background: url('/static/images/N_T_logo.png') center/cover; box-shadow: inset 0 0 20px rgba(255,255,255,0.25);}
+    .brand h1{font-size:18px; letter-spacing:.4px; margin:0}
+    .nav{display:flex; flex-direction:column; gap:8px}
+    .nav a{padding:10px 12px; border-radius:12px; color:var(--muted); display:flex; align-items:center; gap:10px; cursor:pointer;}
+    .nav a.active, .nav a:hover{background:rgba(76,163,255,0.12); color:#d9e6ff}
+    .tag{font-size:10px; padding:2px 8px; border-radius:999px; background:rgba(57,194,127,.15); color:#b8ffd9; margin-left:auto}
+    .sep{height:1px; background:var(--border); margin:14px 0}
+    .main{display:grid; grid-template-rows: auto 1fr;}
+    .top{display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:1px solid var(--border);}
+    .content{padding:24px;}
+    .page-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;}
+    .page-title{font-size:24px; font-weight:600; margin:0}
+    .filters{display:flex; gap:12px; align-items:center;}
+    .btn{background:linear-gradient(180deg, #1b2b4d, #15223f); border:1px solid var(--border); color:#e6eef9; padding:10px 14px; border-radius:12px; cursor:pointer;}
+    .btn.brand{background:linear-gradient(180deg, #1c3b2d, #12261f); border-color:rgba(57,194,127,.3)}
+    .btn:hover{filter:brightness(1.05)}
+    .card{background:linear-gradient(180deg, #0f182d, #0b1220); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); margin-bottom:18px;}
+    .table{width:100%; border-collapse: collapse;}
+    .table th, .table td{padding:12px 10px; border-bottom:1px solid var(--border); color:#cdd6ea; font-size:14px; text-align:left}
+    .table th{background:#0a1122; font-weight:600; color:#a4afc6}
+    .badge{padding:4px 12px; border-radius:999px; font-size:12px; font-weight:500}
+    .b-active{background:rgba(57,194,127,.12); color:#b8ffd9; border:1px solid rgba(57,194,127,.3)}
+    .b-expired{background:rgba(255,93,93,.12); color:#ffc3c3; border:1px solid rgba(255,93,93,.3)}
+    .b-expiring{background:rgba(255,176,32,.12); color:#ffd28a; border:1px solid rgba(255,176,32,.3)}
+    .action-btns{display:flex; gap:8px}
+    .btn-sm{padding:6px 12px; font-size:12px; border-radius:8px}
+    .btn-view{background:var(--brand-2); color:white; border:none}
+    .btn-download{background:var(--brand); color:white; border:none}
+    .btn-revoke{background:var(--danger); color:white; border:none}
+  </style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script defer src="{{ url_for('static', filename='js/nanotrace.js') }}"></script>
+</head>
+<body>
+  <div class="wrap">
+    <aside class="side">
+      <div class="brand">
+        <div class="logo"></div>
+        <h1>NanoTrace Admin</h1>
+      </div>
+      <nav class="nav">
+        <a href="dashboard.html">Overview</a>
+        <a href="applications.html">Applications <span class="tag">12 pend.</span></a>
+        <a class="active" href="certificates.html">Certificates</a>
+        <a href="verifications.html">Verifications</a>
+        <a href="customers.html">Customers</a>
+        <a href="billing.html">Billing</a>
+        <div class="sep"></div>
+        <a href="settings.html">Settings</a>
+        <a href="audit.html">Audit Log</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="top">
+        <div class="page-header">
+          <h1 class="page-title">Issued Certificates</h1>
+          <div class="filters">
+            <select class="btn" id="statusFilter">
+              <option value="">All Status</option>
+              <option value="active">Active</option>
+              <option value="expiring">Expiring Soon</option>
+              <option value="expired">Expired</option>
+            </select>
+            <button class="btn brand">Export All</button>
+          </div>
+        </div>
+      </header>
+
+      <section class="content">
+        <div class="card">
+          <table class="table" id="certificatesTable">
+            <thead>
+              <tr>
+                <th>Certificate ID</th>
+                <th>Company</th>
+                <th>Product</th>
+                <th>Tier</th>
+                <th>Status</th>
+                <th>Issued</th>
+                <th>Expires</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const certificates = [
+      {id: 'NT-2025-128', company: 'NanoBio Ltd', product: 'Carbon Nanotube Composite', tier: 'premium', status: 'active', issued: '2024-08-15', expires: '2026-08-15'},
+      {id: 'NT-2025-127', company: 'MicroCore GmbH', product: 'Silver Coating', tier: 'standard', status: 'active', issued: '2024-07-20', expires: '2025-07-20'},
+      {id: 'NT-2025-126', company: 'AeroPart Co', product: 'Titanium Catalyst', tier: 'enterprise', status: 'expiring', issued: '2022-06-10', expires: '2025-06-10'},
+      {id: 'NT-2025-125', company: 'BioTrace SA', product: 'Quantum Dot Display', tier: 'premium', status: 'active', issued: '2024-05-05', expires: '2026-05-05'},
+      {id: 'NT-2025-124', company: 'GrapheneX', product: 'Supercapacitor', tier: 'standard', status: 'expired', issued: '2023-01-15', expires: '2024-01-15'}
+    ];
+
+    function renderCertificates(data) {
+      const tbody = document.querySelector('#certificatesTable tbody');
+      tbody.innerHTML = '';
+      
+      data.forEach(cert => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${cert.id}</td>
+          <td>${cert.company}</td>
+          <td>${cert.product}</td>
+          <td>${cert.tier.charAt(0).toUpperCase() + cert.tier.slice(1)}</td>
+          <td><span class="badge b-${cert.status}">${cert.status.toUpperCase()}</span></td>
+          <td>${cert.issued}</td>
+          <td>${cert.expires}</td>
+          <td>
+            <div class="action-btns">
+              <button class="btn btn-sm btn-view" onclick="viewCertificate('${cert.id}')">View</button>
+              <button class="btn btn-sm btn-download" onclick="downloadCertificate('${cert.id}')">Download</button>
+              ${cert.status === 'active' ? `<button class="btn btn-sm btn-revoke" onclick="revokeCertificate('${cert.id}')">Revoke</button>` : ''}
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+    }
+
+    function viewCertificate(certId) {
+      console.log(`Viewing certificate ${certId}`);
+    }
+
+    function downloadCertificate(certId) {
+      console.log(`Downloading certificate ${certId}`);
+    }
+
+    function revokeCertificate(certId) {
+      if (confirm('Are you sure you want to revoke this certificate?')) {
+        console.log(`Revoking certificate ${certId}`);
+      }
+    }
+
+    document.getElementById('statusFilter').addEventListener('change', function() {
+      const status = this.value;
+      const filtered = status ? certificates.filter(cert => cert.status === status) : certificates;
+      renderCertificates(filtered);
+    });
+
+    renderCertificates(certificates);
+  </script>
+</body>
+</html>

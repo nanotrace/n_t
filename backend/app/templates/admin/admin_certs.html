@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+</head>
+  <body>
+    <h2>Pending Certificates</h2>
+    <ul>
+      {% for c in certs %}
+        <li>{{ c.product_name }} - {{ c.nano_material }} - {{ c.status }}
+          {% if c.status == 'pending' %}
+            <a href="{{ url_for('admin.approve', cert_id=c.id) }}">Approve</a>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  </body>
+</html>

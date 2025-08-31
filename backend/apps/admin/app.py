@@ -1,0 +1,428 @@
+from flask import Flask, render_template_string, request, session, redirect
+
+app = Flask(__name__)
+app.secret_key = 'admin-app-secret'
+
+@app.route('/')
+def admin_home():
+    if not session.get('admin_logged_in'):
+        return render_template_string('''
+        <html>
+        <head><title>NanoTrace - Admin Login</title></head>
+        <body>
+            <h1>Admin Panel Login</h1>
+            <div style="margin: 20px;">
+                <form method="post" action="/admin/login">
+                    <input type="email" name="email" placeholder="Admin Email" required><br><br>
+                    <input type="password" name="password" placeholder="Password" required><br><br>
+                    <button type="submit">Login</button>
+                </form>
+            </div>
+            <a href="https://nanotrace.org">← Back to Home</a>
+        </body>
+        </html>
+        ''')
+    else:
+        return render_template_string('''
+        <html lang="en">
+        <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>NanoTrace — Admin Dashboard (Mock)</title>
+       <style>
+      :root{
+      --bg:#0b1220;
+      --panel:#111a2e;
+      --muted:#8892a6;
+      --text:#e6eef9;
+      --brand:#39c27f;   /* success green */
+      --brand-2:#4ca3ff; /* primary blue */
+      --warn:#ffb020;
+      --danger:#ff5d5d;
+      --ok:#2ec27e;
+      --card:#0f1629;
+      --border:rgba(255,255,255,0.08);
+      --shadow: 0 6px 24px rgba(0,0,0,0.35);
+      --radius:20px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(1200px 800px at 10% -10%, rgba(76,163,255,0.12), transparent 60%),
+                  radial-gradient(1200px 800px at 110% 10%, rgba(57,194,127,0.10), transparent 60%),
+                  var(--bg);
+      color:var(--text);
+    }
+    a{color:inherit;text-decoration:none}
+    .wrap{display:grid;grid-template-columns: 260px 1fr; min-height:100%}
+    /* Sidebar */
+    .side{
+      background:linear-gradient(180deg, #0d1730, #0a1122);
+      border-right:1px solid var(--border);
+      padding:24px 18px;
+    }
+    .brand{
+      display:flex; align-items:center; gap:12px; margin-bottom:28px;
+    }
+    .brand .logo{
+      width:40px; height:40px; border-radius:12px;
+      background: conic-gradient(from 30deg, var(--brand-2), var(--brand));
+      box-shadow: inset 0 0 20px rgba(255,255,255,0.25);
+    }
+    .brand h1{font-size:18px; letter-spacing:.4px; margin:0}
+    .nav{display:flex; flex-direction:column; gap:8px}
+    .nav a{
+      padding:10px 12px; border-radius:12px; color:var(--muted);
+      display:flex; align-items:center; gap:10px;
+    }
+    .nav a.active, .nav a:hover{ background:rgba(76,163,255,0.12); color:#d9e6ff}
+    .tag{font-size:10px; padding:2px 8px; border-radius:999px; background:rgba(57,194,127,.15); color:#b8ffd9; margin-left:auto}
+    .sep{height:1px; background:var(--border); margin:14px 0}
+    /* Header */
+    .main{display:grid; grid-template-rows: auto 1fr; }
+    .top{
+      display:flex; align-items:center; justify-content:space-between;
+      padding:18px 24px; border-bottom:1px solid var(--border); backdrop-filter: blur(6px);
+    }
+    .search{
+      display:flex; align-items:center; gap:10px; background:var(--card);
+      border:1px solid var(--border); padding:10px 14px; border-radius:14px; min-width:360px;
+    }
+    .search input{
+      background:transparent; border:none; outline:none; color:var(--text); width:100%;
+    }
+    .user{
+      display:flex; align-items:center; gap:12px;
+    }
+    .btn{
+      background:linear-gradient(180deg, #1b2b4d, #15223f);
+      border:1px solid var(--border);
+      color:#e6eef9; padding:10px 14px; border-radius:12px; cursor:pointer;
+    }
+    .btn.brand{ background:linear-gradient(180deg, #1c3b2d, #12261f); border-color:rgba(57,194,127,.3)}
+    .btn:hover{filter:brightness(1.05)}
+    .avatar{ width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,#4ca3ff,#39c27f); }
+    /* Content grid */
+    .content{ padding:24px; display:grid; gap:18px; grid-template-columns: 1fr; }
+    .grid{ display:grid; gap:18px}
+    .kpis{ display:grid; gap:18px; grid-template-columns: repeat(4, 1fr); }
+    .card{
+      background:linear-gradient(180deg, #0f182d, #0b1220);
+      border:1px solid var(--border);
+      border-radius:var(--radius); padding:18px; box-shadow:var(--shadow);
+    }
+    .kpi-title{ color:#a4afc6; font-size:12px; letter-spacing:.6px; text-transform:uppercase; }
+    .kpi-value{ font-size:28px; font-weight:700; margin:6px 0 2px }
+    .kpi-foot{ font-size:12px; color:#95ffc4; display:flex; gap:8px; align-items:center}
+    .delta.up{ color:#95ffc4 } .delta.down{ color:#ff9b9b }
+    /* Panels layout */
+    .cols-2{ display:grid; grid-template-columns: 2fr 1.2fr; gap:18px }
+    .cols-3{ display:grid; grid-template-columns: 1.4fr 1fr 1fr; gap:18px }
+    .table{ width:100%; border-collapse: collapse; }
+    .table th, .table td{ padding:12px 10px; border-bottom:1px solid var(--border); color:#cdd6ea; font-size:14px }
+    .badge{ padding:4px 8px; border-radius:999px; font-size:12px; border:1px solid var(--border)}
+    .b-pending{ background:rgba(255,176,32,.12); color:#ffd28a}
+    .b-approved{ background:rgba(57,194,127,.12); color:#b8ffd9}
+    .b-rejected{ background:rgba(255,93,93,.12); color:#ffc3c3}
+    .actions{ display:flex; gap:10px; flex-wrap:wrap }
+    .mini{
+      display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:8px
+    }
+    .pill{ padding:10px 12px; border:1px dashed var(--border); border-radius:12px; font-size:12px; color:#a4afc6}
+    .ok{ color:#b8ffd9 } .warn{ color:#ffd28a } .danger{ color:#ffc3c3}
+    /* Sparkline + charts */
+    .chart{ width:100%; height:160px; }
+    .smallchart{ width:100%; height:80px; }
+    .legend{ display:flex; gap:12px; color:#a4afc6; font-size:12px }
+    .legend span::before{
+      content:""; display:inline-block; width:10px; height:10px; border-radius:2px; margin-right:6px;
+      background: var(--brand-2);
+    }
+    .legend .alt::before{ background: var(--brand); }
+    /* Responsive */
+    @media (max-width:1200px){ .kpis{ grid-template-columns: repeat(2,1fr);} .cols-2{ grid-template-columns: 1fr;} .cols-3{ grid-template-columns: 1fr;} }
+    @media (max-width:720px){ .wrap{ grid-template-columns: 1fr } .side{ position:sticky; top:0 } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <aside class="side">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <h1>NanoTrace Admin</h1>
+      </div>
+      <nav class="nav">
+        <a class="active" href="#">Overview</a>
+        <a href="#">Applications <span class="tag">12 pend.</span></a>
+        <a href="#">Certificates</a>
+        <a href="#">Verifications</a>
+        <a href="#">Customers</a>
+        <a href="#">Billing</a>
+        <div class="sep"></div>
+        <a href="#">Settings</a>
+        <a href="#">Audit Log</a>
+      </nav>
+    </aside>
+
+    <main class="main">
+      <header class="top">
+        <div class="search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M21 21l-3.8-3.8" stroke="#a4afc6" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="11" cy="11" r="7" stroke="#a4afc6" stroke-width="2"/>
+          </svg>
+          <input placeholder="Search company, certificate ID, batch, HS code..."/>
+        </div>
+        <div class="user">
+          <button class="btn">Quick Actions</button>
+          <button class="btn brand">New Certificate</button>
+          <div class="avatar" title="Admin"></div>
+        </div>
+      </header>
+
+      <section class="content">
+        <!-- KPIs -->
+        <div class="kpis">
+          <div class="card">
+            <div class="kpi-title">New Applications (7d)</div>
+            <div class="kpi-value" id="kpi-apps">–</div>
+            <div class="kpi-foot"><span class="delta up" id="kpi-apps-delta">–</span> vs prior 7d</div>
+          </div>
+          <div class="card">
+            <div class="kpi-title">Certificates Issued (30d)</div>
+            <div class="kpi-value" id="kpi-issued">–</div>
+            <div class="kpi-foot"><span class="delta up" id="kpi-issued-delta">–</span> completion rate</div>
+          </div>
+          <div class="card">
+            <div class="kpi-title">Verification Scans (30d)</div>
+            <div class="kpi-value" id="kpi-scans">–</div>
+            <div class="kpi-foot"><span class="delta up" id="kpi-scans-delta">–</span> growth</div>
+            <div class="smallchart" id="spark-scans"></div>
+          </div>
+          <div class="card">
+            <div class="kpi-title">Revenue (30d)</div>
+            <div class="kpi-value">€<span id="kpi-revenue">–</span></div>
+            <div class="kpi-foot"><span class="delta up" id="kpi-rev-delta">–</span> net margin</div>
+          </div>
+        </div>
+
+        <!-- Middle panels -->
+        <div class="cols-2">
+          <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <h3 style="margin:0">Pipeline Overview</h3>
+              <div class="legend"><span>Applications</span><span class="alt">Approvals</span></div>
+            </div>
+            <div id="chart-pipeline" class="chart" role="img" aria-label="Applications vs Approvals trend"></div>
+            <div class="mini">
+              <div class="pill">Avg. time-to-approve: <b id="m-tta">–</b> days</div>
+              <div class="pill">KYC pass rate: <b id="m-kyc">–</b></div>
+              <div class="pill">Rejection rate: <b id="m-rej">–</b></div>
+              <div class="pill">Refunds (30d): <b id="m-ref">–</b></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3 style="margin:0 0 8px">System Health</h3>
+            <div class="mini">
+              <div class="pill"><b class="ok">●</b> API: healthy</div>
+              <div class="pill"><b class="ok">●</b> DB: healthy</div>
+              <div class="pill"><b class="ok">●</b> Queue: healthy</div>
+              <div class="pill"><b class="warn">●</b> Email: delay</div>
+            </div>
+            <div style="margin-top:12px">
+              <div class="pill">Last deploy: <b id="last-deploy">–</b></div>
+            </div>
+            <div class="sep"></div>
+            <div class="actions">
+              <button class="btn">Approve Next</button>
+              <button class="btn">Bulk Verify</button>
+              <button class="btn">Export Report</button>
+              <button class="btn">Invite Customer</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tables -->
+        <div class="cols-3">
+          <div class="card">
+            <h3 style="margin:0 0 8px">Pending Applications</h3>
+            <table class="table" id="tbl-apps">
+              <thead><tr><th>Company</th><th>Country</th><th>Tier</th><th>Status</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3 style="margin:0 0 8px">Recent Verifications</h3>
+            <table class="table" id="tbl-ver">
+              <thead><tr><th>Cert ID</th><th>Scans</th><th>Region</th><th>Integrity</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <h3 style="margin:0 0 8px">Invoices (Due)</h3>
+            <table class="table" id="tbl-inv">
+              <thead><tr><th>Customer</th><th>Amount</th><th>Due</th><th>Status</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // --- Utility: simple SVG chart builders (no external deps) ---
+    function sparkline(container, data, opts={height:80, pad:6, color:'#4ca3ff'}){
+      const w = container.clientWidth || 300, h = opts.height;
+      const [min, max] = [Math.min(...data), Math.max(...data)];
+      const scaleX = (i)=> i*(w-opts.pad*2)/(data.length-1)+opts.pad;
+      const scaleY = (v)=> h - ((v-min)/(max-min||1))*(h-opts.pad*2) - opts.pad;
+      let d = "";
+      data.forEach((v,i)=>{ d += (i? "L":"M")+ scaleX(i)+" "+scaleY(v)+" "; });
+      container.innerHTML = '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'
+        +'<path d="'+d+'" fill="none" stroke="'+opts.color+'" stroke-width="2" stroke-linecap="round"/>'
+        +'</svg>';
+    }
+
+    function dualLineChart(container, dataA, dataB, opts={height:160, pad:10, colA:'#4ca3ff', colB:'#39c27f'}){
+      const w = container.clientWidth || 600, h = opts.height;
+      const all = dataA.concat(dataB);
+      const [min, max] = [Math.min(...all), Math.max(...all)];
+      const scaleX = (i)=> i*(w-opts.pad*2)/(dataA.length-1)+opts.pad;
+      const scaleY = (v)=> h - ((v-min)/(max-min||1))*(h-opts.pad*2) - opts.pad;
+      const path = (arr)=> arr.map((v,i)=> (i?'L':'M')+scaleX(i)+' '+scaleY(v)).join(' ');
+      container.innerHTML = '<svg width="'+w+'" height="'+h+'" viewBox="0 0 '+w+' '+h+'">'
+        +'<path d="'+path(dataA)+'" fill="none" stroke="'+opts.colA+'" stroke-width="2" stroke-linecap="round"/>'
+        +'<path d="'+path(dataB)+'" fill="none" stroke="'+opts.colB+'" stroke-width="2" stroke-linecap="round"/>'
+        +'</svg>';
+    }
+
+    // --- Mock data (replace later with API calls) ---
+    const mock = {
+      kpis: { apps: 46, appsDelta: '+12%', issued: 128, issuedDelta: '86%', scans: 13742, scansDelta: '+18%', revenue: 18450, revDelta: '32%' },
+      metrics: { tta: 3.4, kyc: '94%', rej: '4.1%', ref: '€320' },
+      series: {
+        scans: [220,260,240,280,300,380,360,420,460,500,540,520],
+        apps:  [12,16,14,18,22,26,20,24,28,25,30,34],
+        appr:  [ 8,10,12,12,18,20,18,20,22,20,26,30],
+      },
+      lastDeploy: '2025-08-09 22:14 UTC',
+      apps: [
+        ['NanoBio Ltd','IE','Pro','KYC'],
+        ['MicroCore GmbH','DE','Std','Docs'],
+        ['AeroPart Co','PL','Pro','Review'],
+        ['BioTrace SA','FR','Std','KYC'],
+        ['GrapheneX','UK','Pro','Payment']
+      ],
+      ver: [
+        ['NT-2025-000128', 642, 'EU', '✔'],
+        ['NT-2025-000127', 118, 'US', '✔'],
+        ['NT-2025-000126',  32, 'APAC', '✔'],
+        ['NT-2025-000125',  11, 'EU', 'Δ']
+      ],
+      inv: [
+        ['NanoBio Ltd','€1,200','3d','Pending'],
+        ['MicroCore GmbH','€600','7d','Pending'],
+        ['AeroPart Co','€2,000','1d','Overdue']
+      ]
+    };
+
+    // --- Populate KPIs ---
+    function fmt(n){ return n.toLocaleString('en-IE'); }
+    document.getElementById('kpi-apps').textContent = mock.kpis.apps;
+    document.getElementById('kpi-apps-delta').textContent = mock.kpis.appsDelta;
+    document.getElementById('kpi-issued').textContent = mock.kpis.issued;
+    document.getElementById('kpi-issued-delta').textContent = mock.kpis.issuedDelta;
+    document.getElementById('kpi-scans').textContent = fmt(mock.kpis.scans);
+    document.getElementById('kpi-scans-delta').textContent = mock.kpis.scansDelta;
+    document.getElementById('kpi-revenue').textContent = fmt(mock.kpis.revenue);
+    document.getElementById('kpi-rev-delta').textContent = mock.kpis.revDelta;
+    document.getElementById('m-tta').textContent = mock.metrics.tta;
+    document.getElementById('m-kyc').textContent = mock.metrics.kyc;
+    document.getElementById('m-rej').textContent = mock.metrics.rej;
+    document.getElementById('m-ref').textContent = mock.metrics.ref;
+    document.getElementById('last-deploy').textContent = mock.lastDeploy;
+
+    // Charts
+    sparkline(document.getElementById('spark-scans'), mock.series.scans, {height:80, color:'#4ca3ff'});
+    dualLineChart(document.getElementById('chart-pipeline'), mock.series.apps, mock.series.appr, {height:160});
+
+    // Tables
+    const tb = document.querySelector('#tbl-apps tbody');
+    mock.apps.forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td>
+        <td><span class="badge b-pending">${r[3]}</span></td>`;
+      tb.appendChild(tr);
+    });
+    const tv = document.querySelector('#tbl-ver tbody');
+    mock.ver.forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td>
+        <td><span class="badge b-approved">${r[3]}</span></td>`;
+      tv.appendChild(tr);
+    });
+    const ti = document.querySelector('#tbl-inv tbody');
+    mock.inv.forEach(r=>{
+      const cls = r[3]==='Overdue' ? 'b-rejected' : 'b-pending';
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td>
+        <td><span class="badge ${cls}">${r[3]}</span></td>`;
+      ti.appendChild(tr);
+    });
+
+    // Resize charts on window resize
+    let rt;
+    window.addEventListener('resize', ()=>{
+      clearTimeout(rt);
+      rt = setTimeout(()=>{
+        sparkline(document.getElementById('spark-scans'), mock.series.scans, {height:80, color:'#4ca3ff'});
+        dualLineChart(document.getElementById('chart-pipeline'), mock.series.apps, mock.series.appr, {height:160});
+      }, 120);
+    });
+  </script>
+</body>
+</html
+        ''')
+
+@app.route('/admin/login', methods=['POST'])
+def admin_login():
+    email = request.form.get('email')
+    password = request.form.get('password')
+    
+    # TODO: Implement real admin authentication
+    if email == 'admin@nanotrace.org' and password == 'NHwGSKcuFePa##K895':
+        session['admin_logged_in'] = True
+        return redirect('/')
+    else:
+        return 'Invalid credentials - use admin@nanotrace.org / NHwGSKcuFePa##K895 for now'
+
+@app.route('/admin/logout')
+def admin_logout():
+    session.pop('admin_logged_in', None)
+    return redirect('/')
+
+@app.route('/admin/certificates')
+def admin_certificates():
+    if not session.get('admin_logged_in'):
+        return redirect('/')
+    return 'Certificate management - Coming soon!'
+
+@app.route('/admin/users')
+def admin_users():
+    if not session.get('admin_logged_in'):
+        return redirect('/')
+    return 'User management - Coming soon!'
+
+@app.route('/healthz')
+def health():
+    return 'OK', 200
+
+if __name__ == '__main__':
+    app.run(host='127.0.0.1', port=8003, debug=False)

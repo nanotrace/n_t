@@ -1,0 +1,27 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+class Config:
+    # --- core ---
+    SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key')
+
+    # DB: prefer env, fallback to local sqlite
+    SQLALCHEMY_DATABASE_URI = os.environ.get(
+        'DATABASE_URL',
+        'sqlite:////home/michal/NanoTrace/nanotrace.db'
+    )
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # --- subdomain routing / URL generation ---
+    SERVER_NAME = ".nanotrace.org"   # leading dot enables all subdomains
+    PREFERRED_URL_SCHEME = "https"
+
+    # --- cookies across subdomains ---
+    SESSION_COOKIE_DOMAIN = ".nanotrace.org"
+    REMEMBER_COOKIE_DOMAIN = ".nanotrace.org"
+    SESSION_COOKIE_SECURE = True
+    REMEMBER_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    REMEMBER_COOKIE_SAMESITE = "Lax"

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NanoTrace - Certificate Verification</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script defer src="{{ url_for('static', filename='js/nanotrace.js') }}"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>NanoTrace</h1>
+            <div class="tagline">Certificate Verification System</div>
+        </div>
+
+        {% if cert %}
+            <div class="status-card valid">
+                <div class="text-center">
+                    <div class="status-icon valid">✅</div>
+                    <h2>Certificate Valid</h2>
+                    <p>This certificate has been verified on the blockchain.</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3 class="mb-3">Certificate Details</h3>
+                <div class="cert-details">
+                    <div class="cert-detail-item">
+                        <div class="cert-detail-label">Certificate ID</div>
+                        <div class="cert-detail-value">{{ cert.cert_id or cert.certificate_id or 'N/A' }}</div>
+                    </div>
+                    
+                    <div class="cert-detail-item">
+                        <div class="cert-detail-label">Product Name</div>
+                        <div class="cert-detail-value">{{ cert.product_name or 'N/A' }}</div>
+                    </div>
+                    
+                    <div class="cert-detail-item">
+                        <div class="cert-detail-label">Material Type</div>
+                        <div class="cert-detail-value">{{ cert.nano_material or cert.material_type or 'N/A' }}</div>
+                    </div>
+                    
+                    <div class="cert-detail-item">
+                        <div class="cert-detail-label">Status</div>
+                        <div class="cert-detail-value">{{ cert.status or 'Active' }}</div>
+                    </div>
+                    
+                    <div class="cert-detail-item">
+                        <div class="cert-detail-label">Issue Date</div>
+                        <div class="cert-detail-value">{{ cert.created_at.strftime('%B %d, %Y') if cert.created_at else 'N/A' }}</div>
+                    </div>
+                    
+                    <div class="cert-detail-item">
+                        <div class="cert-detail-label">Expiry Date</div>
+                        <div class="cert-detail-value">{{ cert.expiry_date.strftime('%B %d, %Y') if cert.expiry_date else 'N/A' }}</div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="status-card invalid">
+                <div class="text-center">
+                    <div class="status-icon invalid">❌</div>
+                    <h2>Certificate Not Found</h2>
+                    <p>The certificate ID you entered could not be verified.</p>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="card">
+            <h3 class="mb-3">Verify Another Certificate</h3>
+            <form method="GET" action="{{ url_for('verify.verify_certificate', cert_id='') }}">
+                <div class="form-group">
+                    <label for="cert_id">Certificate ID</label>
+                    <input type="text" id="cert_id" name="cert_id" class="form-control" 
+                           placeholder="Enter certificate ID" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Verify Certificate</button>
+            </form>
+        </div>
+
+        <div class="nav-back">
+            <a href="/">← Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>

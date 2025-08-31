@@ -1,0 +1,301 @@
+<!-- Verifications Page -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Verifications - NanoTrace Admin</title>
+  <style>
+    :root{
+      --bg:#0b1220; --panel:#111a2e; --muted:#8892a6; --text:#e6eef9;
+      --brand:#39c27f; --brand-2:#4ca3ff; --warn:#ffb020; --danger:#ff5d5d;
+      --ok:#2ec27e; --card:#0f1629; --border:rgba(255,255,255,0.08);
+      --shadow: 0 6px 24px rgba(0,0,0,0.35); --radius:20px;
+    }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial;
+      background: radial-gradient(1200px 800px at 10% -10%, rgba(76,163,255,0.12), transparent 60%),
+                  radial-gradient(1200px 800px at 110% 10%, rgba(57,194,127,0.10), transparent 60%), var(--bg); color:var(--text);}
+    a{color:inherit;text-decoration:none} .wrap{display:grid;grid-template-columns: 260px 1fr; min-height:100%}
+    .side{background:linear-gradient(180deg, #0d1730, #0a1122); border-right:1px solid var(--border); padding:24px 18px;}
+    .brand{display:flex; align-items:center; gap:12px; margin-bottom:28px;}
+    .brand .logo{width:40px; height:40px; border-radius:12px; background: url('/static/images/N_T_logo.png') center/cover; box-shadow: inset 0 0 20px rgba(255,255,255,0.25);}
+    .brand h1{font-size:18px; letter-spacing:.4px; margin:0} .nav{display:flex; flex-direction:column; gap:8px}
+    .nav a{padding:10px 12px; border-radius:12px; color:var(--muted); display:flex; align-items:center; gap:10px; cursor:pointer;}
+    .nav a.active, .nav a:hover{background:rgba(76,163,255,0.12); color:#d9e6ff}
+    .tag{font-size:10px; padding:2px 8px; border-radius:999px; background:rgba(57,194,127,.15); color:#b8ffd9; margin-left:auto}
+    .sep{height:1px; background:var(--border); margin:14px 0} .main{display:grid; grid-template-rows: auto 1fr;}
+    .top{display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:1px solid var(--border);}
+    .content{padding:24px;} .page-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;}
+    .page-title{font-size:24px; font-weight:600; margin:0} .filters{display:flex; gap:12px; align-items:center;}
+    .btn{background:linear-gradient(180deg, #1b2b4d, #15223f); border:1px solid var(--border); color:#e6eef9; padding:10px 14px; border-radius:12px; cursor:pointer;}
+    .btn.brand{background:linear-gradient(180deg, #1c3b2d, #12261f); border-color:rgba(57,194,127,.3)} .btn:hover{filter:brightness(1.05)}
+    .card{background:linear-gradient(180deg, #0f182d, #0b1220); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); margin-bottom:18px;}
+    .stats-row{display:grid; grid-template-columns: repeat(4, 1fr); gap:18px; margin-bottom:24px;}
+    .stat-card{padding:20px; text-align:center;} .stat-number{font-size:2em; font-weight:bold; color:var(--brand-2); margin-bottom:8px}
+    .stat-label{color:var(--muted); font-size:14px} .table{width:100%; border-collapse: collapse;}
+    .table th, .table td{padding:12px 10px; border-bottom:1px solid var(--border); color:#cdd6ea; font-size:14px; text-align:left}
+    .table th{background:#0a1122; font-weight:600; color:#a4afc6} .badge{padding:4px 12px; border-radius:999px; font-size:12px; font-weight:500}
+    .b-valid{background:rgba(57,194,127,.12); color:#b8ffd9; border:1px solid rgba(57,194,127,.3)}
+    .b-invalid{background:rgba(255,93,93,.12); color:#ffc3c3; border:1px solid rgba(255,93,93,.3)}
+    .b-warning{background:rgba(255,176,32,.12); color:#ffd28a; border:1px solid rgba(255,176,32,.3)}
+    .live-indicator{display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--ok); animation:pulse 2s infinite;}
+    @keyframes pulse{0%{opacity:1} 50%{opacity:0.5} 100%{opacity:1}}
+  </style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script defer src="{{ url_for('static', filename='js/nanotrace.js') }}"></script>
+</head>
+<body>
+  <div class="wrap">
+    <aside class="side">
+      <div class="brand"><div class="logo"></div><h1>NanoTrace Admin</h1></div>
+      <nav class="nav">
+        <a href="dashboard.html">Overview</a>
+        <a href="applications.html">Applications <span class="tag">12 pend.</span></a>
+        <a href="certificates.html">Certificates</a>
+        <a class="active" href="verifications.html">Verifications</a>
+        <a href="customers.html">Customers</a>
+        <a href="billing.html">Billing</a>
+        <div class="sep"></div>
+        <a href="settings.html">Settings</a>
+        <a href="audit.html">Audit Log</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <header class="top">
+        <div class="page-header">
+          <h1 class="page-title">Certificate Verifications <span class="live-indicator"></span></h1>
+          <div class="filters">
+            <select class="btn"><option>Last 24h</option><option>Last 7d</option><option>Last 30d</option></select>
+            <button class="btn brand">Export Report</button>
+          </div>
+        </div>
+      </header>
+      <section class="content">
+        <div class="stats-row">
+          <div class="card stat-card">
+            <div class="stat-number">13,742</div>
+            <div class="stat-label">Total Verifications</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-number">98.7%</div>
+            <div class="stat-label">Valid Rate</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-number">47</div>
+            <div class="stat-label">Countries</div>
+          </div>
+          <div class="card stat-card">
+            <div class="stat-number">1.2s</div>
+            <div class="stat-label">Avg Response</div>
+          </div>
+        </div>
+        <div class="card">
+          <table class="table">
+            <thead>
+              <tr><th>Timestamp</th><th>Certificate ID</th><th>Location</th><th>IP Address</th><th>Status</th><th>Response Time</th></tr>
+            </thead>
+            <tbody id="verificationsTable"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const verifications = [
+      {time: '2025-01-28 14:32:15', certId: 'NT-2025-128', location: 'Dublin, IE', ip: '185.23.45.67', status: 'valid', responseTime: '0.8s'},
+      {time: '2025-01-28 14:31:42', certId: 'NT-2025-127', location: 'Frankfurt, DE', ip: '89.45.67.123', status: 'valid', responseTime: '1.1s'},
+      {time: '2025-01-28 14:30:18', certId: 'NT-2025-999', location: 'London, UK', ip: '78.123.45.89', status: 'invalid', responseTime: '0.5s'},
+      {time: '2025-01-28 14:29:55', certId: 'NT-2025-126', location: 'Warsaw, PL', ip: '195.67.89.12', status: 'warning', responseTime: '2.1s'}
+    ];
+    function renderVerifications() {
+      const tbody = document.getElementById('verificationsTable');
+      tbody.innerHTML = verifications.map(v => `
+        <tr>
+          <td>${v.time}</td>
+          <td>${v.certId}</td>
+          <td>${v.location}</td>
+          <td>${v.ip}</td>
+          <td><span class="badge b-${v.status}">${v.status.toUpperCase()}</span></td>
+          <td>${v.responseTime}</td>
+        </tr>
+      `).join('');
+    }
+    renderVerifications();
+    setInterval(() => {
+      // Simulate real-time updates
+      if(Math.random() > 0.7) {
+        const newVerification = {
+          time: new Date().toISOString().slice(0,19).replace('T', ' '),
+          certId: 'NT-2025-' + Math.floor(Math.random()*999 + 100),
+          location: ['Dublin, IE', 'Berlin, DE', 'Paris, FR', 'Rome, IT'][Math.floor(Math.random()*4)],
+          ip: `${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}.${Math.floor(Math.random()*255)}`,
+          status: Math.random() > 0.1 ? 'valid' : 'invalid',
+          responseTime: (Math.random() * 3).toFixed(1) + 's'
+        };
+        verifications.unshift(newVerification);
+        if(verifications.length > 20) verifications.pop();
+        renderVerifications();
+      }
+    }, 5000);
+  </script>
+</body>
+</html>
+
+<!-- Customers Page -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Customers - NanoTrace Admin</title>
+  <style>
+    :root{--bg:#0b1220; --panel:#111a2e; --muted:#8892a6; --text:#e6eef9; --brand:#39c27f; --brand-2:#4ca3ff; --warn:#ffb020; --danger:#ff5d5d; --ok:#2ec27e; --card:#0f1629; --border:rgba(255,255,255,0.08); --shadow: 0 6px 24px rgba(0,0,0,0.35); --radius:20px;}
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; background: radial-gradient(1200px 800px at 10% -10%, rgba(76,163,255,0.12), transparent 60%), radial-gradient(1200px 800px at 110% 10%, rgba(57,194,127,0.10), transparent 60%), var(--bg); color:var(--text);}
+    a{color:inherit;text-decoration:none} .wrap{display:grid;grid-template-columns: 260px 1fr; min-height:100%}
+    .side{background:linear-gradient(180deg, #0d1730, #0a1122); border-right:1px solid var(--border); padding:24px 18px;}
+    .brand{display:flex; align-items:center; gap:12px; margin-bottom:28px;} .brand .logo{width:40px; height:40px; border-radius:12px; background: url('/static/images/N_T_logo.png') center/cover; box-shadow: inset 0 0 20px rgba(255,255,255,0.25);}
+    .brand h1{font-size:18px; letter-spacing:.4px; margin:0} .nav{display:flex; flex-direction:column; gap:8px} .nav a{padding:10px 12px; border-radius:12px; color:var(--muted); display:flex; align-items:center; gap:10px; cursor:pointer;} .nav a.active, .nav a:hover{background:rgba(76,163,255,0.12); color:#d9e6ff}
+    .tag{font-size:10px; padding:2px 8px; border-radius:999px; background:rgba(57,194,127,.15); color:#b8ffd9; margin-left:auto} .sep{height:1px; background:var(--border); margin:14px 0} .main{display:grid; grid-template-rows: auto 1fr;}
+    .top{display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:1px solid var(--border);} .content{padding:24px;} .page-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;} .page-title{font-size:24px; font-weight:600; margin:0} .filters{display:flex; gap:12px; align-items:center;}
+    .btn{background:linear-gradient(180deg, #1b2b4d, #15223f); border:1px solid var(--border); color:#e6eef9; padding:10px 14px; border-radius:12px; cursor:pointer;} .btn.brand{background:linear-gradient(180deg, #1c3b2d, #12261f); border-color:rgba(57,194,127,.3)} .btn:hover{filter:brightness(1.05)}
+    .card{background:linear-gradient(180deg, #0f182d, #0b1220); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); margin-bottom:18px;}
+    .table{width:100%; border-collapse: collapse;} .table th, .table td{padding:12px 10px; border-bottom:1px solid var(--border); color:#cdd6ea; font-size:14px; text-align:left} .table th{background:#0a1122; font-weight:600; color:#a4afc6}
+    .badge{padding:4px 12px; border-radius:999px; font-size:12px; font-weight:500} .b-active{background:rgba(57,194,127,.12); color:#b8ffd9; border:1px solid rgba(57,194,127,.3)} .b-inactive{background:rgba(255,93,93,.12); color:#ffc3c3; border:1px solid rgba(255,93,93,.3)}
+    .action-btns{display:flex; gap:8px} .btn-sm{padding:6px 12px; font-size:12px; border-radius:8px} .btn-view{background:var(--brand-2); color:white; border:none} .btn-contact{background:var(--brand); color:white; border:none}
+    .customer-avatar{width:32px; height:32px; border-radius:50%; background:var(--brand-2); display:inline-flex; align-items:center; justify-content:center; color:white; font-weight:bold; margin-right:10px}
+  </style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script defer src="{{ url_for('static', filename='js/nanotrace.js') }}"></script>
+</head>
+<body>
+  <div class="wrap">
+    <aside class="side">
+      <div class="brand"><div class="logo"></div><h1>NanoTrace Admin</h1></div>
+      <nav class="nav">
+        <a href="dashboard.html">Overview</a><a href="applications.html">Applications <span class="tag">12 pend.</span></a><a href="certificates.html">Certificates</a><a href="verifications.html">Verifications</a>
+        <a class="active" href="customers.html">Customers</a><a href="billing.html">Billing</a><div class="sep"></div><a href="settings.html">Settings</a><a href="audit.html">Audit Log</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <header class="top">
+        <div class="page-header">
+          <h1 class="page-title">Customer Management</h1>
+          <div class="filters">
+            <select class="btn"><option>All Customers</option><option>Active</option><option>Inactive</option></select>
+            <button class="btn brand">Invite Customer</button>
+          </div>
+        </div>
+      </header>
+      <section class="content">
+        <div class="card">
+          <table class="table">
+            <thead><tr><th>Company</th><th>Contact</th><th>Certificates</th><th>Revenue</th><th>Status</th><th>Last Activity</th><th>Actions</th></tr></thead>
+            <tbody id="customersTable"></tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const customers = [
+      {company: 'NanoBio Ltd', contact: 'Dr. Sarah Chen', email: 'chen@nanobio.ie', certificates: 15, revenue: '€18,450', status: 'active', lastActivity: '2025-01-27'},
+      {company: 'MicroCore GmbH', contact: 'Hans Mueller', email: 'mueller@microcore.de', certificates: 8, revenue: '€12,300', status: 'active', lastActivity: '2025-01-26'},
+      {company: 'AeroPart Co', contact: 'Anna Kowalski', email: 'kowalski@aeropart.pl', certificates: 23, revenue: '€45,600', status: 'active', lastActivity: '2025-01-25'},
+      {company: 'BioTrace SA', contact: 'Pierre Dubois', email: 'dubois@biotrace.fr', certificates: 3, revenue: '€4,200', status: 'inactive', lastActivity: '2024-12-15'}
+    ];
+    function renderCustomers() {
+      document.getElementById('customersTable').innerHTML = customers.map(c => `
+        <tr>
+          <td>
+            <div style="display:flex; align-items:center">
+              <div class="customer-avatar">${c.company.charAt(0)}</div>
+              <div>
+                <div style="font-weight:500">${c.company}</div>
+                <div style="font-size:12px; color:var(--muted)">${c.email}</div>
+              </div>
+            </div>
+          </td>
+          <td>${c.contact}</td>
+          <td>${c.certificates}</td>
+          <td>${c.revenue}</td>
+          <td><span class="badge b-${c.status}">${c.status.toUpperCase()}</span></td>
+          <td>${c.lastActivity}</td>
+          <td>
+            <div class="action-btns">
+              <button class="btn btn-sm btn-view">View</button>
+              <button class="btn btn-sm btn-contact">Contact</button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+    renderCustomers();
+  </script>
+</body>
+</html>
+
+<!-- Billing Page -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Billing - NanoTrace Admin</title>
+  <style>
+    :root{--bg:#0b1220; --panel:#111a2e; --muted:#8892a6; --text:#e6eef9; --brand:#39c27f; --brand-2:#4ca3ff; --warn:#ffb020; --danger:#ff5d5d; --ok:#2ec27e; --card:#0f1629; --border:rgba(255,255,255,0.08); --shadow: 0 6px 24px rgba(0,0,0,0.35); --radius:20px;}
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; background: radial-gradient(1200px 800px at 10% -10%, rgba(76,163,255,0.12), transparent 60%), radial-gradient(1200px 800px at 110% 10%, rgba(57,194,127,0.10), transparent 60%), var(--bg); color:var(--text);}
+    a{color:inherit;text-decoration:none} .wrap{display:grid;grid-template-columns: 260px 1fr; min-height:100%} .side{background:linear-gradient(180deg, #0d1730, #0a1122); border-right:1px solid var(--border); padding:24px 18px;} .brand{display:flex; align-items:center; gap:12px; margin-bottom:28px;} .brand .logo{width:40px; height:40px; border-radius:12px; background: url('/static/images/N_T_logo.png') center/cover; box-shadow: inset 0 0 20px rgba(255,255,255,0.25);} .brand h1{font-size:18px; letter-spacing:.4px; margin:0} .nav{display:flex; flex-direction:column; gap:8px} .nav a{padding:10px 12px; border-radius:12px; color:var(--muted); display:flex; align-items:center; gap:10px; cursor:pointer;} .nav a.active, .nav a:hover{background:rgba(76,163,255,0.12); color:#d9e6ff} .tag{font-size:10px; padding:2px 8px; border-radius:999px; background:rgba(57,194,127,.15); color:#b8ffd9; margin-left:auto} .sep{height:1px; background:var(--border); margin:14px 0} .main{display:grid; grid-template-rows: auto 1fr;} .top{display:flex; align-items:center; justify-content:space-between; padding:18px 24px; border-bottom:1px solid var(--border);} .content{padding:24px;} .page-header{display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;} .page-title{font-size:24px; font-weight:600; margin:0} .filters{display:flex; gap:12px; align-items:center;} .btn{background:linear-gradient(180deg, #1b2b4d, #15223f); border:1px solid var(--border); color:#e6eef9; padding:10px 14px; border-radius:12px; cursor:pointer;} .btn.brand{background:linear-gradient(180deg, #1c3b2d, #12261f); border-color:rgba(57,194,127,.3)} .btn:hover{filter:brightness(1.05)} .card{background:linear-gradient(180deg, #0f182d, #0b1220); border:1px solid var(--border); border-radius:var(--radius); padding:18px; box-shadow:var(--shadow); margin-bottom:18px;} .stats-row{display:grid; grid-template-columns: repeat(4, 1fr); gap:18px; margin-bottom:24px;} .stat-card{padding:20px; text-align:center;} .stat-number{font-size:2em; font-weight:bold; color:var(--brand); margin-bottom:8px} .stat-label{color:var(--muted); font-size:14px} .table{width:100%; border-collapse: collapse;} .table th, .table td{padding:12px 10px; border-bottom:1px solid var(--border); color:#cdd6ea; font-size:14px; text-align:left} .table th{background:#0a1122; font-weight:600; color:#a4afc6} .badge{padding:4px 12px; border-radius:999px; font-size:12px; font-weight:500} .b-paid{background:rgba(57,194,127,.12); color:#b8ffd9; border:1px solid rgba(57,194,127,.3)} .b-pending{background:rgba(255,176,32,.12); color:#ffd28a; border:1px solid rgba(255,176,32,.3)} .b-overdue{background:rgba(255,93,93,.12); color:#ffc3c3; border:1px solid rgba(255,93,93,.3)} .action-btns{display:flex; gap:8px} .btn-sm{padding:6px 12px; font-size:12px; border-radius:8px} .btn-view{background:var(--brand-2); color:white; border:none} .btn-send{background:var(--brand); color:white; border:none}
+  </style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+<script defer src="{{ url_for('static', filename='js/nanotrace.js') }}"></script>
+</head>
+<body>
+  <div class="wrap">
+    <aside class="side">
+      <div class="brand"><div class="logo"></div><h1>NanoTrace Admin</h1></div>
+      <nav class="nav">
+        <a href="dashboard.html">Overview</a><a href="applications.html">Applications <span class="tag">12 pend.</span></a><a href="certificates.html">Certificates</a><a href="verifications.html">Verifications</a><a href="customers.html">Customers</a>
+        <a class="active" href="billing.html">Billing</a><div class="sep"></div><a href="settings.html">Settings</a><a href="audit.html">Audit Log</a>
+      </nav>
+    </aside>
+    <main class="main">
+      <header class="top">
+        <div class="page-header">
+          <h1 class="page-title">Billing & Finance</h1>
+          <div class="filters">
+            <select class="btn"><option>All Invoices</option><option>Pending</option><option>Paid</option><option>Overdue</option></select>
+            <button class="btn brand">Generate Invoice</button>
+          </div>
+        </div>
+      </header>
+      <section class="content">
+        <div class="stats-row">
+          <div class="card stat-card"><div class="stat-number">€84,250</div><div class="stat-label">Monthly Revenue</div></div>
+          <div class="card stat-card"><div class="stat-number">€12,400</div><div class="stat-label">Outstanding</div></div>
+          <div class="card stat-card"><div class="stat-number">€3,200</div><div class="stat-label">Overdue</div></div>
+          <div class="card stat-card"><div class="stat-number">95.2%</div><div class="stat-label">Collection Rate</div></div>
+        </div>
+        <div class="card">
+          <table class="table">
+            <thead><tr><th>Invoice #</th><th>Customer</th><th>Service</th><th>Amount</th><th>Status</th><th>Due Date</th><th>Actions</th></tr></thead>
+            <tbody>
+              <tr><td>INV-2025-001</td><td>NanoBio Ltd</td><td>Premium Certificate</td><td>€599</td><td><span class="badge b-paid">PAID</span></td><td>2025-01-15</td><td><div class="action-btns"><button class="btn btn-sm btn-view">View</button></div></td></tr>
+              <tr><td>INV-2025-002</td><td>MicroCore GmbH</td><td>Standard Certificate</td><td>€299</td><td><span class="badge b-pending">PENDING</span></td><td>2025-02-01</td><td><div class="action-btns"><button class="btn btn-sm btn-view">View</button><button class="btn btn-sm btn-send">Send Reminder</button></div></td></tr>
+              <tr><td>INV-2025-003</td><td>AeroPart Co</td><td>Enterprise Certificate</td><td>€999</td><td><span class="badge b-overdue">OVERDUE</span></td><td>2025-01-10</td><td><div class="action-btns"><button class="btn btn-sm btn-view">View</button><button class="btn btn-sm btn-send">Send Notice</button></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>
+
+<!-- Settings Page -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Settings - NanoTrace Admin</title>
+  <style>
+    :root{--bg:#0b1220; --panel:#111a2e; --muted:#8892a6; --text:#e6eef9; --brand:#39c27f; --brand-2:#4ca3ff; --warn:#ffb020; --danger:#ff5d5d; --ok:#2ec27e; --card:#0f1629; --border:rgba(255,255,255,0.08); --shadow: 0 6px 24px rgba(0,0,0,0.35); --radius:20px;}
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; background: radial-gradient(1200px 800px at 10% -10%, rgba(76,163,255,0.12), transparent 60%), radial-gradient(1200px 800px at 110% 10%, rgba(57,194,127,0.10), transparent 60%), var(--bg); color:var(

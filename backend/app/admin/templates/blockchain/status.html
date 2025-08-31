@@ -1,0 +1,110 @@
+{% extends "admin_base.html" %}
+{% block page_title %}Blockchain Status{% endblock %}
+{% block content %}
+<div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-6">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-semibold text-gray-900">Hyperledger Fabric Network</h2>
+        <div class="flex space-x-2">
+            <button id="start-network" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                <i class="fas fa-play mr-2"></i>Start Network
+            </button>
+            <button id="stop-network" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                <i class="fas fa-stop mr-2"></i>Stop Network
+            </button>
+            <button onclick="location.reload()" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                <i class="fas fa-sync-alt mr-2"></i>Refresh
+            </button>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for name, status in fabric_status.items() %}
+        <div class="bg-gray-50 p-4 rounded-lg border">
+            <div class="flex items-center justify-between mb-2">
+                <h3 class="font-medium text-gray-900">{{ name }}</h3>
+                <span class="status-indicator status-{{ 'healthy' if status.healthy else 'error' }}"></span>
+            </div>
+            <div class="space-y-1">
+                <p class="text-sm text-gray-600">Status: 
+                    <span class="font-medium {{ 'text-green-600' if status.healthy else 'text-red-600' }}">
+                        {{ status.status }}
+                    </span>
+                </p>
+                <p class="text-sm text-gray-600">Health: 
+                    <span class="font-medium {{ 'text-green-600' if status.healthy else 'text-red-600' }}">
+                        {{ 'Healthy' if status.healthy else 'Unhealthy' }}
+                    </span>
+                </p>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-span-full text-center py-8">
+            <i class="fas fa-exclamation-triangle text-yellow-500 text-3xl mb-4"></i>
+            <p class="text-gray-600">No Fabric containers found or Docker not accessible.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+    <h3 class="text-lg font-semibold text-gray-900 mb-4">Network Information</h3>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-blue-50 p-4 rounded-lg">
+            <h4 class="font-medium text-blue-900 mb-2">Peer Node</h4>
+            <p class="text-sm text-blue-700">peer0.org1.nanotrace.com</p>
+            <p class="text-xs text-blue-600 mt-1">Handles transactions and maintains ledger</p>
+        </div>
+        <div class="bg-purple-50 p-4 rounded-lg">
+            <h4 class="font-medium text-purple-900 mb-2">Orderer Node</h4>
+            <p class="text-sm text-purple-700">orderer.nanotrace.com</p>
+            <p class="text-xs text-purple-600 mt-1">Orders transactions into blocks</p>
+        </div>
+        <div class="bg-green-50 p-4 rounded-lg">
+            <h4 class="font-medium text-green-900 mb-2">Certificate Authority</h4>
+            <p class="text-sm text-green-700">ca.org1.nanotrace.com</p>
+            <p class="text-xs text-green-600 mt-1">Manages digital certificates</p>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('start-network').addEventListener('click', function() {
+        controlFabricNetwork('start');
+    });
+    
+    document.getElementById('stop-network').addEventListener('click', function() {
+        controlFabricNetwork('stop');
+    });
+});
+
+function controlFabricNetwork(action) {
+    if (!confirm(`Are you sure you want to ${action} the Fabric network?`)) {
+        return;
+    }
+    
+    showLoading();
+    
+    fetch(`/admin/blockchain/${action}-network`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        hideLoading();
+        if (data.success) {
+            alert(`Network ${action} completed successfully`);
+            setTimeout(() => location.reload(), 2000);
+        } else {
+            alert(`Failed to ${action} network: ${data.error}`);
+        }
+    })
+    .catch(error => {
+        hideLoading();
+        alert(`Error: ${error.message}`);
+    });
+}
+</script>
+{% endblock %}

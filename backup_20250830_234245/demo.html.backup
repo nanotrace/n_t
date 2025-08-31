@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NanoTrace - Enhanced UI Demo</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script defer src="js/nanotrace.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>NanoTrace</h1>
+            <div class="tagline">Blockchain-Backed Nanotechnology Certification</div>
+            <p>Enhanced UI Demo - Professional Styling System</p>
+        </div>
+
+        <!-- Demo Buttons -->
+        <div class="card">
+            <h2 class="text-center mb-3">Enhanced Button Styles</h2>
+            <div style="text-align: center;">
+                <button class="btn btn-primary">Primary Action</button>
+                <button class="btn btn-success">Success Button</button>
+                <button class="btn btn-danger">Danger Button</button>
+                <button class="btn btn-secondary">Secondary</button>
+            </div>
+        </div>
+
+        <!-- Status Cards Demo -->
+        <div class="cert-details">
+            <div class="status-card valid">
+                <div class="text-center">
+                    <div class="status-icon valid">✅</div>
+                    <h3>Certificate Valid</h3>
+                    <p>This certificate has been verified on the blockchain.</p>
+                </div>
+            </div>
+            
+            <div class="status-card invalid">
+                <div class="text-center">
+                    <div class="status-icon invalid">❌</div>
+                    <h3>Certificate Invalid</h3>
+                    <p>This certificate could not be verified.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Demo -->
+        <div class="card">
+            <h3 class="mb-3">Enhanced Form with Validation</h3>
+            <form onsubmit="event.preventDefault(); nanotrace.showNotification('Form submitted successfully!', 'success');">
+                <div class="form-group">
+                    <label for="demo-email">Email Address *</label>
+                    <input type="email" id="demo-email" class="form-control" required placeholder="Enter your email">
+                </div>
+                
+                <div class="form-group">
+                    <label for="demo-product">Product Name *</label>
+                    <input type="text" id="demo-product" class="form-control" required minlength="3" placeholder="Enter product name">
+                </div>
+                
+                <button type="submit" class="btn btn-primary">Submit Application</button>
+            </form>
+        </div>
+
+        <!-- Certificate Details Demo -->
+        <div class="card">
+            <h3 class="mb-3">Certificate Information</h3>
+            <div class="cert-details">
+                <div class="cert-detail-item">
+                    <div class="cert-detail-label">Certificate ID</div>
+                    <div class="cert-detail-value">NANO-CERT-2025-001</div>
+                </div>
+                
+                <div class="cert-detail-item">
+                    <div class="cert-detail-label">Product Name</div>
+                    <div class="cert-detail-value">Advanced Carbon Nanotube Array</div>
+                </div>
+                
+                <div class="cert-detail-item">
+                    <div class="cert-detail-label">Material Type</div>
+                    <div class="cert-detail-value">Multi-Wall Carbon Nanotube</div>
+                </div>
+                
+                <div class="cert-detail-item">
+                    <div class="cert-detail-label">Blockchain Hash</div>
+                    <div class="cert-detail-value">0X4F3D2E1A8B9C5D6E7F8A9B0C1D2E3F4</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alerts Demo -->
+        <div class="card">
+            <h3 class="mb-3">System Notifications</h3>
+            
+            <div class="alert alert-success">
+                <strong>Success!</strong> Your certificate has been approved and issued.
+            </div>
+            
+            <div class="alert alert-info">
+                <strong>Information:</strong> New blockchain verification features are available.
+            </div>
+            
+            <div class="alert alert-danger">
+                <strong>Error:</strong> Certificate verification failed. Please contact support.
+            </div>
+        </div>
+
+        <!-- Interactive Demo -->
+        <div class="card">
+            <h3 class="mb-3">Interactive Features</h3>
+            
+            <div class="text-center">
+                <button class="btn btn-primary" onclick="nanotrace.showNotification('Success! This is a test notification.', 'success')">
+                    Show Success Notification
+                </button>
+                
+                <button class="btn btn-warning" onclick="nanotrace.showNotification('Warning: This is a test warning.', 'warning')">
+                    Show Warning
+                </button>
+                
+                <button class="btn btn-danger" onclick="nanotrace.showNotification('Error: This is a test error.', 'error')">
+                    Show Error
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="nav-back">
+            <a href="/">← Back to NanoTrace Application</a>
+        </div>
+    </div>
+</body>
+</html>

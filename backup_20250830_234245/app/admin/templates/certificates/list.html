@@ -1,0 +1,184 @@
+{% extends "admin_base.html" %}
+{% block page_title %}Certificates{% endblock %}
+{% block content %}
+<div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200 mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <h2 class="text-xl font-semibold text-gray-900 mb-4 sm:mb-0">Certificate Management</h2>
+        
+        <div class="flex flex-col sm:flex-row gap-4">
+            <div class="relative">
+                <input type="text" id="cert-search" placeholder="Search certificates..." 
+                       value="{{ search }}"
+                       class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+            </div>
+            
+            <select id="status-filter" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                <option value="">All Status</option>
+                <option value="pending" {{ 'selected' if status_filter == 'pending' }}>Pending</option>
+                <option value="approved" {{ 'selected' if status_filter == 'approved' }}>Approved</option>
+                <option value="rejected" {{ 'selected' if status_filter == 'rejected' }}>Rejected</option>
+            </select>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mt-6">
+        <div class="bg-blue-50 p-4 rounded-lg">
+            <div class="flex items-center">
+                <i class="fas fa-certificate text-blue-600 text-xl mr-3"></i>
+                <div>
+                    <p class="text-sm text-blue-600">Total</p>
+                    <p class="text-2xl font-bold text-blue-900">{{ stats.total }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-yellow-50 p-4 rounded-lg">
+            <div class="flex items-center">
+                <i class="fas fa-clock text-yellow-600 text-xl mr-3"></i>
+                <div>
+                    <p class="text-sm text-yellow-600">Pending</p>
+                    <p class="text-2xl font-bold text-yellow-900">{{ stats.pending }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-green-50 p-4 rounded-lg">
+            <div class="flex items-center">
+                <i class="fas fa-check text-green-600 text-xl mr-3"></i>
+                <div>
+                    <p class="text-sm text-green-600">Approved</p>
+                    <p class="text-2xl font-bold text-green-900">{{ stats.approved }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-red-50 p-4 rounded-lg">
+            <div class="flex items-center">
+                <i class="fas fa-times text-red-600 text-xl mr-3"></i>
+                <div>
+                    <p class="text-sm text-red-600">Rejected</p>
+                    <p class="text-2xl font-bold text-red-900">{{ stats.rejected }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+    <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Created</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for cert in certificates.items %}
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div>
+                            <div class="text-sm font-medium text-gray-900">{{ cert.product_name }}</div>
+                            <div class="text-sm text-gray-500">{{ cert.material_type }}</div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">{{ cert.user.username }}</div>
+                        <div class="text-sm text-gray-500">{{ cert.user.email }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                               {{ 'bg-green-100 text-green-800' if cert.status == 'approved' 
+                               else 'bg-yellow-100 text-yellow-800' if cert.status == 'pending'
+                               else 'bg-red-100 text-red-800' }}">
+                            {{ cert.status.title() }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ cert.created_at.strftime('%Y-%m-%d') if cert.created_at else 'N/A' }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        {% if cert.status == 'pending' %}
+                        <button onclick="approveCertificate({{ cert.id }})" 
+                                class="text-green-600 hover:text-green-900 mr-3">Approve</button>
+                        {% endif %}
+                        <a href="/admin/certificates/{{ cert.id }}" 
+                           class="text-blue-600 hover:text-blue-900">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    {% if certificates.pages > 1 %}
+    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+        <div class="flex-1 flex justify-between sm:hidden">
+            {% if certificates.has_prev %}
+                <a href="{{ url_for('admin.certificates', page=certificates.prev_num, search=search, status=status_filter) }}" 
+                   class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Previous</a>
+            {% endif %}
+            {% if certificates.has_next %}
+                <a href="{{ url_for('admin.certificates', page=certificates.next_num, search=search, status=status_filter) }}" 
+                   class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">Next</a>
+            {% endif %}
+        </div>
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+            <div>
+                <p class="text-sm text-gray-700">
+                    Showing <span class="font-medium">{{ certificates.per_page * (certificates.page - 1) + 1 }}</span>
+                    to <span class="font-medium">{{ certificates.per_page * certificates.page if certificates.has_next else certificates.total }}</span>
+                    of <span class="font-medium">{{ certificates.total }}</span> results
+                </p>
+            </div>
+            <div>
+                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    {% for page_num in certificates.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num != certificates.page %}
+                                <a href="{{ url_for('admin.certificates', page=page_num, search=search, status=status_filter) }}" 
+                                   class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">{{ page_num }}</a>
+                            {% else %}
+                                <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-blue-50 text-sm font-medium text-blue-600">{{ page_num }}</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">...</span>
+                        {% endif %}
+                    {% endfor %}
+                </nav>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function approveCertificate(certId) {
+    if (confirm('Are you sure you want to approve this certificate?')) {
+        showLoading();
+        
+        fetch(`/admin/certificates/${certId}/approve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            if (data.success) {
+                alert('Certificate approved successfully');
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            alert('Error: ' + error.message);
+        });
+    }
+}
+</script>
+{% endblock %}

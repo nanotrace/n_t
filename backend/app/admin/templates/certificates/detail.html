@@ -1,0 +1,165 @@
+{% extends "admin_base.html" %}
+{% block page_title %}Certificate Detail{% endblock %}
+{% block content %}
+<div class="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-semibold text-gray-900">Certificate: {{ cert.product_name }}</h2>
+        <div class="flex space-x-2">
+            {% if cert.status == 'pending' %}
+            <button onclick="approveCertificate({{ cert.id }})" 
+                    class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                <i class="fas fa-check mr-2"></i>Approve
+            </button>
+            <button onclick="rejectCertificate({{ cert.id }})" 
+                    class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                <i class="fas fa-times mr-2"></i>Reject
+            </button>
+            {% endif %}
+            <a href="{{ url_for('admin.certificates') }}" 
+               class="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">
+                <i class="fas fa-arrow-left mr-2"></i>Back to List
+            </a>
+        </div>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-4">
+            <h3 class="font-semibold text-gray-900">Certificate Information</h3>
+            <div class="space-y-2">
+                <p><strong>Product Name:</strong> {{ cert.product_name }}</p>
+                <p><strong>Material Type:</strong> {{ cert.material_type }}</p>
+                <p><strong>Status:</strong> 
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                           {{ 'bg-green-100 text-green-800' if cert.status == 'approved' 
+                           else 'bg-yellow-100 text-yellow-800' if cert.status == 'pending'
+                           else 'bg-red-100 text-red-800' }}">
+                        {{ cert.status.title() }}
+                    </span>
+                </p>
+                <p><strong>Created:</strong> {{ cert.created_at.strftime('%Y-%m-%d %H:%M') if cert.created_at else 'N/A' }}</p>
+                {% if cert.certificate_id %}
+                <p><strong>Certificate ID:</strong> 
+                    <code class="bg-gray-100 px-2 py-1 rounded text-sm">{{ cert.certificate_id }}</code>
+                </p>
+                {% endif %}
+                {% if cert.batch_number is defined and cert.batch_number %}
+                <p><strong>Batch Number:</strong> {{ cert.batch_number }}</p>
+                {% endif %}
+                {% if cert.quantity is defined and cert.quantity %}
+                <p><strong>Quantity:</strong> {{ cert.quantity }}</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="space-y-4">
+            <h3 class="font-semibold text-gray-900">Supplier Information</h3>
+            <div class="space-y-2">
+                <p><strong>Supplier:</strong> {{ cert.user.username }}</p>
+                <p><strong>Email:</strong> {{ cert.user.email }}</p>
+                <p><strong>User ID:</strong> {{ cert.user.id }}</p>
+            </div>
+            
+            {% if cert.status != 'pending' %}
+            <div class="pt-4 border-t border-gray-200">
+                <h3 class="font-semibold text-gray-900 mb-2">Approval Information</h3>
+                <div class="space-y-2">
+                    {% if cert.approved_at %}
+                    <p><strong>Approved At:</strong> {{ cert.approved_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    {% if cert.approver %}
+                    <p><strong>Approved By:</strong> {{ cert.approver.username }}</p>
+                    {% endif %}
+                    {% endif %}
+                    
+                    {% if cert.rejected_at %}
+                    <p><strong>Rejected At:</strong> {{ cert.rejected_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    {% if cert.rejecter %}
+                    <p><strong>Rejected By:</strong> {{ cert.rejecter.username }}</p>
+                    {% endif %}
+                    {% if cert.rejection_reason %}
+                    <p><strong>Rejection Reason:</strong></p>
+                    <div class="bg-red-50 border border-red-200 rounded p-3 text-sm">
+                        {{ cert.rejection_reason }}
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if cert.description is defined and cert.description %}
+    <div class="mt-6 pt-6 border-t border-gray-200">
+        <h3 class="font-semibold text-gray-900 mb-2">Description</h3>
+        <div class="bg-gray-50 border border-gray-200 rounded p-4">
+            {{ cert.description }}
+        </div>
+    </div>
+    {% endif %}
+    
+    {% if cert.qr_code_path is defined and cert.qr_code_path %}
+    <div class="mt-6 pt-6 border-t border-gray-200">
+        <h3 class="font-semibold text-gray-900 mb-2">QR Code</h3>
+        <img src="{{ cert.qr_code_path }}" alt="Certificate QR Code" class="w-32 h-32">
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function approveCertificate(certId) {
+    if (confirm('Are you sure you want to approve this certificate?')) {
+        showLoading();
+        
+        fetch(`/admin/certificates/${certId}/approve`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            if (data.success) {
+                alert('Certificate approved successfully');
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            alert('Error: ' + error.message);
+        });
+    }
+}
+
+function rejectCertificate(certId) {
+    const reason = prompt('Please provide a reason for rejection:');
+    if (reason) {
+        showLoading();
+        
+        fetch(`/admin/certificates/${certId}/reject`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ reason: reason })
+        })
+        .then(response => response.json())
+        .then(data => {
+            hideLoading();
+            if (data.success) {
+                alert('Certificate rejected');
+                location.reload();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        })
+        .catch(error => {
+            hideLoading();
+            alert('Error: ' + error.message);
+        });
+    }
+}
+</script>
+{% endblock %}

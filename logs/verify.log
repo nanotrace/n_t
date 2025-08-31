@@ -1,0 +1,31 @@
+Starting NanoTrace Verify Service on port 8002...
+ * Serving Flask app 'app'
+ * Debug mode: off
+[31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:8002
+[33mPress CTRL+C to quit[0m
+127.0.0.1 - - [30/Aug/2025 23:45:07] "GET /healthz HTTP/1.1" 200 -
+127.0.0.1 - - [30/Aug/2025 23:45:16] "[33mGET /robots.txt HTTP/1.1[0m" 404 -
+127.0.0.1 - - [30/Aug/2025 23:45:16] "[33mGET /robots.txt HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 02:06:36] "[33mGET /.well-known/acme-challenge/nwGX-Kp5ifmeWAdtOn2Me4y7zNbjJiStyo3ZoaSV7R4 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 02:06:50] "[33mGET /.well-known/acme-challenge/UKaMNAAliTt62IrpxJrv1OoZjzaMI9_ZCgtgYBtH6A0 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 02:06:57] "[33mGET /.well-known/acme-challenge/61XRrmi8eFBvZte1dVSvl1VZPsGIcqHBMS78rgOlWYU HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 02:07:07] "[33mGET /.well-known/acme-challenge/VuUhyHDCMfrvRKjKBVADiuyhg4eSeNISrr0DQAJfYos HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 04:29:05] "[33mGET /.git/config HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 04:55:01] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [31/Aug/2025 06:53:47] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [31/Aug/2025 06:53:47] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 06:53:48] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 08:33:56] "[33mGET /robots.txt HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 08:33:56] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [31/Aug/2025 08:34:03] "[33mGET /sitemap.xml HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 09:43:08] "[33mGET /.well-known/acme-challenge/v9aOpwH2DJxyxG9o0qGhj6FGCuQj3VQjDiKOJmruA-Y HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 09:43:18] "[33mGET /.well-known/acme-challenge/qHJef0go8qlcVCgz_knLJOHp8QrPvdxh_AMaEkTydko HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 09:43:25] "[33mGET /.well-known/acme-challenge/FCSJJA-cvk_2KEg9tpVXFleyC13LUg5Touv7xSckEVo HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 09:43:36] "[33mGET /.well-known/acme-challenge/UZz1I2329Zs83-ng-vvRGnUbgJ_hhC1UbvhWEIPYkZc HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 10:07:08] "GET / HTTP/1.1" 200 -
+127.0.0.1 - - [31/Aug/2025 11:45:08] "[33mGET /.well-known/acme-challenge/PkLZYAOrGUPaeHAt8JTKlQVbWv6dXZMQ6hKDFSghGZk HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 11:45:19] "[33mGET /.well-known/acme-challenge/JfMRyw935CmLZXD8TdmeBJAItJ9yxOLwXll4YRDtQXs HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 11:45:26] "[33mGET /.well-known/acme-challenge/wSMw3U_mczxgA9XaXvFqTojdNcGm9t4juSDG_nM1tzw HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 11:45:36] "[33mGET /.well-known/acme-challenge/DI07mBqFXlE2cXnkeu4oWpeXjmd9rk5qc17ybHDKVE4 HTTP/1.1[0m" 404 -
+127.0.0.1 - - [31/Aug/2025 12:03:20] "GET / HTTP/1.1" 200 -

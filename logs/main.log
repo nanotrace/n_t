@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/home/michal/NanoTrace/backend/app.py", line 1, in <module>
+    from backend.app import create_app
+ModuleNotFoundError: No module named 'backend'
