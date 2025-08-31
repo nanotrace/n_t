@@ -44,3 +44,4 @@ Thumbs.db
 
 # Large vendor/sample trees you don't want in this repo
 fabric-network/fabric-samples/
+*.tar.gz
