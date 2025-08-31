@@ -5,5 +5,5 @@ Flask==2.3.3
 reportlab==4.0.4
 qrcode[pil]==7.4.2
 requests==2.31.0
-Pillow==10.0.0
+Pillow==10.3.0
 Werkzeug==2.3.7
